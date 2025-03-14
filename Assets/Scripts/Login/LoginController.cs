@@ -4,6 +4,6 @@ public class LoginController : MonoBehaviour
 {
     public void GoToMenu()
     {
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("Menu");
     }
 }

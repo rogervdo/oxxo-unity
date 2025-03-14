@@ -10,13 +10,7 @@ public class CameraMovement : MonoBehaviour
     public float limiteMouse = 5f;
 
     public Vector2 mousePosition;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
 
-    }
-
-    // Update is called once per frame
     void Update()
     {
         MoverCamara();
@@ -41,20 +35,4 @@ public class CameraMovement : MonoBehaviour
         movimiento = Mathf.Clamp(movimiento, -margenMovimiento, margenMovimiento);
         transform.position = new Vector3(movimiento, transform.position.y, -10f);
     }
-
-    public void ResetMovimiento()
-    {
-        movimiento = 0f;
-        // Debug.Log("Movimiento = 0;");
-    }
-
-    // private void OnDrawGizmos()
-    // {
-    //     Gizmos.color = Color.yellow;
-    //     Gizmos.DrawLine(new Vector2(margenMouse, -4f), new Vector2(margenMouse, 4f));
-    //     Gizmos.DrawLine(new Vector2(-margenMouse, -4f), new Vector2(-margenMouse, 4f));
-    //     Gizmos.color = Color.red;
-    //     Gizmos.DrawLine(new Vector2(limiteMouse, -4f), new Vector2(limiteMouse, 4f));
-    //     Gizmos.DrawLine(new Vector2(-limiteMouse, -4f), new Vector2(-limiteMouse, 4f));
-    // }
 }

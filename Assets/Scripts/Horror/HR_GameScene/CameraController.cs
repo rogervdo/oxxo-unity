@@ -45,6 +45,25 @@ public class CameraController : MonoBehaviour
         Debug.Log("Camera moved instantly to View ID: " + nextID + " Position: " + newPos);
     }
 
+    public void MoveCameraToView(int viewID)
+    {
+        if (viewManager == null)
+        {
+            Debug.LogError("ViewManager is not initialized!");
+            return;
+        }
+
+        if (!viewIDs.Contains(viewID))
+        {
+            Debug.LogWarning("View ID " + viewID + " does not exist in the list of views!");
+            return;
+        }
+
+        Vector3 newPos = viewManager.GetViewPosition(viewID);
+        mainCamera.transform.position = new Vector3(newPos.x, newPos.y, -10f);
+        Debug.Log("Camera moved instantly to View ID: " + viewID + " Position: " + newPos);
+    }
+
     // Update is called once per frame
     void Update()
     {

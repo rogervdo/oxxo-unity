@@ -5,7 +5,7 @@ public class HealthController : MonoBehaviour
 {
     public Image healthBarFill;
     public float maxHealth = 100f;
-    public float currentHealth;
+    public float currentHealth = 100f;
     public float decreaseRate = 3f;
     public float healAmount = 10f;
     public bool andatti;

@@ -193,11 +193,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1689147102}
+  m_Father: {fileID: 595713810}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 623.5}
+  m_AnchoredPosition: {x: 0, y: 195}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &419023049
@@ -213,7 +213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.103773594, g: 0.103773594, b: 0.103773594, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -222,7 +222,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: fc02250244bd8c349bc59e0f800d6c0d, type: 3}
-    m_FontSize: 200
+    m_FontSize: 187
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 0
@@ -254,7 +254,7 @@ GameObject:
   - component: {fileID: 595713812}
   - component: {fileID: 595713811}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -272,6 +272,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 419023048}
   - {fileID: 1689147102}
   m_Father: {fileID: 1124022162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -293,14 +294,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 0.2688679, b: 0.2688679, a: 0.49803922}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 7175883267850838165, guid: 6e87435d8db32c5499555b5042d54e4a, type: 3}
+  m_Sprite: {fileID: -1794062123677418229, guid: e3c657d7afc95b84683c88e04f63866e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -490,7 +491,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Start
+  m_Text: INICIAR
 --- !u!222 &1146786818
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -723,7 +724,7 @@ GameObject:
   - component: {fileID: 1689147104}
   - component: {fileID: 1689147103}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: FooterBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -741,7 +742,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 419023048}
   - {fileID: 1956994649}
   - {fileID: 1554534404}
   m_Father: {fileID: 595713810}
@@ -1084,7 +1084,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Exit
+  m_Text: SALIR
 --- !u!222 &2071710788
 CanvasRenderer:
   m_ObjectHideFlags: 0

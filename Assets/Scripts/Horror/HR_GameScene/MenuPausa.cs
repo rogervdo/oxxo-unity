@@ -26,6 +26,6 @@ public class MenuPausa : MonoBehaviour
 
     public void Cerrar()
     {
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("Menu_Main");
     }
 }

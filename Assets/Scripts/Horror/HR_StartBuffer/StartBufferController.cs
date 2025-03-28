@@ -8,6 +8,11 @@ public class StartBufferController : MonoBehaviour
         SceneManager.LoadScene("HR_GameScene");
     }
 
+    public void GetMenu()
+    {
+        SceneManager.LoadScene("Menu_Main");
+    }
+
     // Sale del juego al presionarse "Exit". Preprocesador para diferenciar editor unity de juego
     public void ExitGame()
     {

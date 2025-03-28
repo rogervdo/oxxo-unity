@@ -721,7 +721,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 966118337}
         m_TargetAssemblyTypeName: SceneController, Assembly-CSharp
-        m_MethodName: ExitGame
+        m_MethodName: Regresar_M
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1197,7 +1197,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1969990645}
         m_TargetAssemblyTypeName: SceneController, Assembly-CSharp
-        m_MethodName: ControlRoom
+        m_MethodName: SpaceShipGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

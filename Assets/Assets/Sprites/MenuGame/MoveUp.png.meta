@@ -1,10 +1,25 @@
 fileFormatVersion: 2
-guid: 866d233080d506940b98903a05cd4ffa
+guid: 6cf2e04ff25379a49a9e84d82af7ed48
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1251377898344657353
-    second: 0033_0
+      213: 2370939894988042111
+    second: MoveUp_0
+  - first:
+      213: 2489378009113660492
+    second: MoveUp_1
+  - first:
+      213: 8106897979964126758
+    second: MoveUp_2
+  - first:
+      213: -3118701277780897096
+    second: MoveUp_3
+  - first:
+      213: -3260401994508434078
+    second: MoveUp_4
+  - first:
+      213: -5565926766000624638
+    second: MoveUp_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +52,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 48
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +90,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -98,6 +113,19 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: VisionOS
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -135,40 +163,137 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: VisionOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 0033_0
+      name: MoveUp_0
       rect:
         serializedVersion: 2
-        x: 25
-        y: 25
-        width: 14
-        height: 14
+        x: 0
+        y: 0
+        width: 46
+        height: 73
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9c1bb968199cd5110800000000000000
-      internalID: 1251377898344657353
+      spriteID: f7f6090d54547e020800000000000000
+      internalID: 2370939894988042111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MoveUp_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 47
+        height: 76
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4c83e82c1c0c8220800000000000000
+      internalID: 2489378009113660492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MoveUp_2
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 0
+        width: 45
+        height: 73
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 626f716b2cc718070800000000000000
+      internalID: 8106897979964126758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MoveUp_3
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 0
+        width: 45
+        height: 73
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b2105126b528b4d0800000000000000
+      internalID: -3118701277780897096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MoveUp_4
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 0
+        width: 48
+        height: 76
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 265895c09a9b0c2d0800000000000000
+      internalID: -3260401994508434078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MoveUp_5
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 0
+        width: 46
+        height: 73
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20ca1ba881bd1c2b0800000000000000
+      internalID: -5565926766000624638
       vertices: []
       indices: 
       edges: []
@@ -177,7 +302,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: c39ac29ae17441b4997e6e944b7d7b4d
     internalID: 0
     vertices: []
     indices: 
@@ -187,7 +312,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      0033_0: 1251377898344657353
+      MoveUp_0: 2370939894988042111
+      MoveUp_1: 2489378009113660492
+      MoveUp_2: 8106897979964126758
+      MoveUp_3: -3118701277780897096
+      MoveUp_4: -3260401994508434078
+      MoveUp_5: -5565926766000624638
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

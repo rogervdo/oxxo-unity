@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 795e043ec8df97c439fe53d1137c291a
+guid: 2f3b68af115f0534abb943d63a243787
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3677740660711496394
-    second: Personaje 5_0
+      213: 7352607153630497436
+    second: Rule Amarillo _0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Personaje 5_0
+      name: Rule Amarillo _0
       rect:
         serializedVersion: 2
-        x: 120
+        x: 2
         y: 0
-        width: 251
-        height: 473
+        width: 242
+        height: 160
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: aca18b935a5f90330800000000000000
-      internalID: 3677740660711496394
+      spriteID: c9a442d1045b90660800000000000000
+      internalID: 7352607153630497436
       vertices: []
       indices: 
       edges: []
@@ -173,8 +173,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      Personaje 5_0: 3677740660711496394
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

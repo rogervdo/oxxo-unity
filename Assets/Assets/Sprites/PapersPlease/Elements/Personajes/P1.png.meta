@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6bf7bc3cd889d1049a98bc7dd6780fce
+guid: a654458326f38854584e18554b3ed805
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2937471875692255269
-    second: mm1tch_httpss.mj.runs6_pDTcQYAQ_httpss.mj.runlaVmnatSZtQ_http_942d3eec-5743-4cc4-be2e-ac804ffba733_0-removebg-preview_0
+      213: -5917191430236241410
+    second: Ftp1 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: mm1tch_httpss.mj.runs6_pDTcQYAQ_httpss.mj.runlaVmnatSZtQ_http_942d3eec-5743-4cc4-be2e-ac804ffba733_0-removebg-preview_0
+      name: Ftp1 1_0
       rect:
         serializedVersion: 2
-        x: 100
-        y: 58
-        width: 300
-        height: 406
+        x: 89
+        y: 0
+        width: 316
+        height: 481
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd7a9a774e00c37d0800000000000000
-      internalID: -2937471875692255269
+      spriteID: ef188ccaeb9e1eda0800000000000000
+      internalID: -5917191430236241410
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      mm1tch_httpss.mj.runs6_pDTcQYAQ_httpss.mj.runlaVmnatSZtQ_http_942d3eec-5743-4cc4-be2e-ac804ffba733_0-removebg-preview_0: -2937471875692255269
+      Ftp1 1_0: -5917191430236241410
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

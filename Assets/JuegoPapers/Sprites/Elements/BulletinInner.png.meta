@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6bf7bc3cd889d1049a98bc7dd6780fce
+guid: 1817db6777a50a64ea16d0ff3350a792
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2937471875692255269
-    second: mm1tch_httpss.mj.runs6_pDTcQYAQ_httpss.mj.runlaVmnatSZtQ_http_942d3eec-5743-4cc4-be2e-ac804ffba733_0-removebg-preview_0
+      213: 7090257132029657351
+    second: BulletinInner_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -110,6 +110,19 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
+    buildTarget: VisionOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -135,30 +148,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: VisionOS
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: mm1tch_httpss.mj.runs6_pDTcQYAQ_httpss.mj.runlaVmnatSZtQ_http_942d3eec-5743-4cc4-be2e-ac804ffba733_0-removebg-preview_0
+      name: BulletinInner_0
       rect:
         serializedVersion: 2
-        x: 100
-        y: 58
-        width: 300
-        height: 406
+        x: 0
+        y: 0
+        width: 150
+        height: 200
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -167,8 +167,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd7a9a774e00c37d0800000000000000
-      internalID: -2937471875692255269
+      spriteID: 701cec8bb47a56260800000000000000
+      internalID: 7090257132029657351
       vertices: []
       indices: 
       edges: []
@@ -186,8 +186,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      mm1tch_httpss.mj.runs6_pDTcQYAQ_httpss.mj.runlaVmnatSZtQ_http_942d3eec-5743-4cc4-be2e-ac804ffba733_0-removebg-preview_0: -2937471875692255269
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

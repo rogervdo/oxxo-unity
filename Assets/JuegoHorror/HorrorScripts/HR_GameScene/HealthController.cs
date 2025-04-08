@@ -1,204 +1,173 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Text; // For StringBuilder
+using System.Text; // Para StringBuilder
 
 public class HealthController : MonoBehaviour
 {
-    [Header("Settings")]
-    [Tooltip("The UI Image component used for the health bar fill.")]
+    [Header("Settings")] // Puedes quitar [Header] si prefieres
     public Image healthBarFill;
-    [Tooltip("Maximum health value.")]
     public float maxHealth = 100f;
-    [Tooltip("Rate at which health decreases per second.")]
     public float decreaseRate = 3f;
 
-    [Header("State (Read Only)")]
-    [SerializeField] // Show private variable in Inspector (read-only)
+    [Header("State (Read Only)")] // Puedes quitar [Header] si prefieres
+    [SerializeField]
     private float currentHealth = 100f;
     [SerializeField]
     private bool andatti = false;
 
-    // Flag to track if health changed this frame, triggering LateUpdate UI refresh
+    // Bandera y Log Builder para depuración
     private bool healthChangedThisFrame = false;
-    private StringBuilder debugLogBuilder = new StringBuilder(); // To reduce log spam
+    private StringBuilder debugLogBuilder = new StringBuilder();
 
     void Start()
     {
+        // --- LOG INICIO ---
+        debugLogBuilder.Clear(); // Limpia por si acaso
         debugLogBuilder.AppendLine($"--- HealthController Start Frame {Time.frameCount} ---");
         currentHealth = maxHealth;
         andatti = false;
-        debugLogBuilder.AppendLine($"Start: Initializing currentHealth={currentHealth}, maxHealth={maxHealth}");
-        // Ensure the image reference is valid before updating
-        if (healthBarFill != null)
-        {
-            UpdateHealthBar(); // Initial visual setup only if reference is valid
+        debugLogBuilder.AppendLine($"Start: Inicializando currentHealth={currentHealth}, maxHealth={maxHealth}");
+        if (healthBarFill != null) {
+            UpdateHealthBar(); // Configuración visual inicial
+        } else {
+            debugLogBuilder.AppendLine("Start ERROR: healthBarFill NO está asignado!");
+            Debug.LogError("HealthController Start: healthBarFill is NOT assigned in the Inspector!", this); // Error directo también
         }
-        else
-        {
-            Debug.LogError("HealthController Start: healthBarFill is NOT assigned in the Inspector!", this);
-        }
-        healthChangedThisFrame = false; // Start with no change flagged
-        Debug.Log(debugLogBuilder.ToString()); // Print accumulated start log
-        debugLogBuilder.Clear();
+        healthChangedThisFrame = false;
+        Debug.Log(debugLogBuilder.ToString()); // Imprime log de inicio
+        // --- FIN LOG INICIO ---
     }
 
     void Update()
     {
-        debugLogBuilder.Clear(); // Clear at start of Update for this frame's log
+        // --- LOG INICIO UPDATE ---
+        debugLogBuilder.Clear(); // Limpia para el log de este fotograma
         debugLogBuilder.AppendLine($"--- HealthController Update Frame {Time.frameCount} (Time={Time.time:F3}, Delta={Time.deltaTime:F4}) ---");
         debugLogBuilder.AppendLine($"Update Start: currentHealth={currentHealth:F3}, andatti={andatti}, healthChangedThisFrame={healthChangedThisFrame}");
+        // --- FIN LOG INICIO UPDATE ---
 
-        // --- Health Decrease Logic ---
-        if (!andatti)
-        {
+        // --- Lógica de Descenso de Vida ---
+        if (!andatti) {
             float previousHealth = currentHealth;
             float decreaseAmount = decreaseRate * Time.deltaTime;
-            // Only decrease if currentHealth is above 0
-            if (currentHealth > 0)
-            {
+            if (currentHealth > 0) {
                 currentHealth -= decreaseAmount;
-                currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Clamp *after* decrease
-
-                // Check if health actually changed
-                if (currentHealth != previousHealth)
-                {
-                    debugLogBuilder.AppendLine($"Update Decrease: Decreased by {decreaseAmount:F4}. Health {previousHealth:F3} -> {currentHealth:F3}. Flagging change.");
+                currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+                if (currentHealth != previousHealth) {
+                    debugLogBuilder.AppendLine($"Update Decrease: Disminuyó en {decreaseAmount:F4}. Vida {previousHealth:F3} -> {currentHealth:F3}. Marcando cambio.");
                     healthChangedThisFrame = true;
+                } else {
+                     // debugLogBuilder.AppendLine($"Update Decrease: Calculado {decreaseAmount:F4}, pero vida no cambió tras clamp. Vida={currentHealth:F3}");
                 }
-                else if (previousHealth == 0 && currentHealth == 0) {
-                     // Optional: Log only if it was already 0 and tried to decrease
-                     // debugLogBuilder.AppendLine($"Update Decrease: Skipped decrease amount {decreaseAmount:F4}, health already at 0.");
-                }
-                 else {
-                    // This case might happen if decreaseAmount is extremely small due to low deltaTime
-                    debugLogBuilder.AppendLine($"Update Decrease: Decrease calculated ({decreaseAmount:F4}), but health value didn't change after clamp. Health={currentHealth:F3}");
-                }
-            }
-            else {
-                 // Already at 0, no need to decrease further
-                 // debugLogBuilder.AppendLine($"Update Decrease: Skipped, health already at 0.");
+            } else {
+                 // debugLogBuilder.AppendLine($"Update Decrease: Saltado, vida ya en 0.");
             }
         } else {
-             debugLogBuilder.AppendLine($"Update Decrease: Skipped (andatti={andatti})");
+             debugLogBuilder.AppendLine($"Update Decrease: Saltado (andatti={andatti})");
         }
+        // --- Fin Lógica Descenso ---
 
-        // --- Spacebar Test (for debugging) ---
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-           debugLogBuilder.AppendLine($"Update: Spacebar pressed!");
-           // Temporarily make spacebar heal HUGE amount
-           AddHealth(50f); // Use a large value like 50 for testing
+        // --- Prueba con Barra Espaciadora ---
+        if (Input.GetKeyDown(KeyCode.Space)) {
+           debugLogBuilder.AppendLine($"Update: ¡Barra espaciadora presionada!");
+           AddHealth(10f); // AddHealth añadirá su propio log
         }
+        // --- Fin Prueba ---
 
-        // DO NOT print log here, wait until LateUpdate finishes for the frame
+        // No imprimir log aquí, esperar a LateUpdate
     }
 
-    // --- LateUpdate for UI Synchronization ---
-    // Runs after all Update functions are complete for the frame.
+    // Se llama después de todos los Updates del fotograma.
     void LateUpdate()
     {
-        // Append LateUpdate start info to the log built during Update
+        // --- LOG INICIO LATEUPDATE ---
+        // Añade al log que se construyó durante Update
         debugLogBuilder.AppendLine($"--- HealthController LateUpdate Frame {Time.frameCount} ---");
         debugLogBuilder.AppendLine($"LateUpdate Start: healthChangedThisFrame={healthChangedThisFrame}, currentHealth={currentHealth:F3}");
-        if (healthChangedThisFrame)
-        {
-            debugLogBuilder.AppendLine($"LateUpdate: Change detected, calling UpdateHealthBar.");
-            UpdateHealthBar(); // This will append its own log messages
-            healthChangedThisFrame = false; // Reset flag *after* potentially updating
+        // --- FIN LOG INICIO LATEUPDATE ---
+
+        if (healthChangedThisFrame) {
+            debugLogBuilder.AppendLine($"LateUpdate: Cambio detectado, llamando a UpdateHealthBar.");
+            UpdateHealthBar(); // UpdateHealthBar añadirá sus logs
+            healthChangedThisFrame = false; // Resetea bandera DESPUÉS de actualizar
         } else {
-             debugLogBuilder.AppendLine($"LateUpdate: No change detected, skipping UI update.");
+             debugLogBuilder.AppendLine($"LateUpdate: No se detectó cambio, saltando actualización UI.");
         }
 
-        // Print accumulated log for this entire frame (Update + LateUpdate) and clear
+        // Imprime el log completo acumulado para este fotograma y limpia para el siguiente
         Debug.Log(debugLogBuilder.ToString());
-        // Ensure it's clear for the *next* frame's Update
-        // debugLogBuilder.Clear(); // Clearing here might be too early if other LateUpdates log? Let's clear at start of Update instead.
+        // debugLogBuilder.Clear(); // Es más seguro limpiar al inicio del Update
     }
 
-    /// <summary>
-    /// Adds a specific amount to the current health/time.
-    /// Clamps the value and flags that a change occurred for LateUpdate.
-    /// Called externally (e.g., by ClickEffectSpawner).
-    /// </summary>
+    // Añade vida. Llamado por otros scripts.
     public void AddHealth(float amountToAdd)
     {
-        // Log happens *within* Update or wherever AddHealth is called
-        // Append to the current frame's log string
-        debugLogBuilder.AppendLine($"AddHealth({amountToAdd:F1}) called. Current health before add = {currentHealth:F3}");
+        // --- LOG ADDHEALTH ---
+        // Añade al log del fotograma actual
+        debugLogBuilder.AppendLine($"AddHealth({amountToAdd:F1}) llamado. Vida actual ANTES de añadir = {currentHealth:F3}");
+        // --- FIN LOG ADDHEALTH ---
+
         if (amountToAdd <= 0) {
-             debugLogBuilder.AppendLine($"AddHealth: Amount was <= 0, aborting.");
+             debugLogBuilder.AppendLine($"AddHealth: Cantidad <= 0, abortando.");
              return;
         }
 
         float previousHealth = currentHealth;
-        // Only add health if not already at max
-        if (currentHealth < maxHealth)
-        {
+        if (currentHealth < maxHealth) {
             currentHealth += amountToAdd;
-            currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Clamp after adding
+            currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-             // Check if the health value actually changed after clamping
-            if (currentHealth != previousHealth)
-            {
-                debugLogBuilder.AppendLine($"AddHealth: Health changed {previousHealth:F3} -> {currentHealth:F3}. Flagging change.");
-                healthChangedThisFrame = true; // Flag that a change happened
-            }
-            else
-            {
-                // This could happen if amountToAdd is very small or due to float precision near max
-                debugLogBuilder.AppendLine($"AddHealth: Health value unchanged after adding & clamping. Previous={previousHealth:F3}, Current={currentHealth:F3}");
+            if (currentHealth != previousHealth) {
+                debugLogBuilder.AppendLine($"AddHealth: Vida cambió {previousHealth:F3} -> {currentHealth:F3}. Marcando cambio.");
+                healthChangedThisFrame = true; // Marca que hubo cambio
+            } else {
+                // debugLogBuilder.AppendLine($"AddHealth: Vida no cambió tras añadir y clampear. Prev={previousHealth:F3}, Curr={currentHealth:F3}");
             }
         } else {
-             debugLogBuilder.AppendLine($"AddHealth: Skipped adding health, already at max ({currentHealth:F3}).");
+             debugLogBuilder.AppendLine($"AddHealth: Saltado, vida ya al máximo ({currentHealth:F3}).");
         }
     }
 
-    /// <summary>
-    /// Updates the fill amount of the health bar Image component.
-    /// Called by Start and LateUpdate. Appends logs to the frame's StringBuilder.
-    /// </summary>
+    // Actualiza la barra de vida visual. Llamado por Start y LateUpdate.
     private void UpdateHealthBar()
     {
-        // Log happens *within* LateUpdate context usually
-        debugLogBuilder.Append($"UpdateHealthBar: "); // Append to existing log for the frame
+        // --- LOG UPDATEHEALTHBAR ---
+        // Añade al log del fotograma actual
+        debugLogBuilder.Append($"UpdateHealthBar: "); // Usa Append para continuar la línea
+        // --- FIN LOG UPDATEHEALTHBAR ---
+
         if (healthBarFill == null) {
-             debugLogBuilder.AppendLine($"FAILED - healthBarFill is NULL!");
-             // Optional: Try to find it dynamically as a last resort? Not recommended for performance.
-             // healthBarFill = GetComponentInChildren<Image>(); // Example, adjust if needed
-             // if(healthBarFill == null) return; // Still couldn't find it
-             return; // Critical error, stop processing
+             debugLogBuilder.AppendLine($"FALLÓ - ¡healthBarFill es NULL!");
+             return;
         }
         if (maxHealth <= 0) {
-            debugLogBuilder.AppendLine($"FAILED - maxHealth <= 0 ({maxHealth:F1})!");
+            debugLogBuilder.AppendLine($"FALLÓ - ¡maxHealth <= 0 ({maxHealth:F1})!");
             healthBarFill.fillAmount = 0f;
             return;
         }
 
-        // Calculate fill amount (0.0 to 1.0) and set it
         float fillValue = Mathf.Clamp01(currentHealth / maxHealth);
-        debugLogBuilder.AppendLine($"Setting fillAmount to {fillValue:F3} (current={currentHealth:F3}, max={maxHealth:F1}) on Image '{healthBarFill.gameObject.name}'");
+        debugLogBuilder.AppendLine($"Calculado fillValue={fillValue:F3}. Intentando asignar a '{healthBarFill.gameObject.name}' (VidaActual={currentHealth:F3})");
 
-        // Check if the value is actually different before assigning, minor optimization
+        // Asigna solo si el valor es diferente (micro-optimización)
         if (healthBarFill.fillAmount != fillValue) {
              healthBarFill.fillAmount = fillValue;
         } else {
-             // Optional: Log if the value didn't need changing
-             // debugLogBuilder.Append(" (Value unchanged, skipping assignment)");
+             // debugLogBuilder.Append(" (Valor sin cambios, asignación saltada)");
         }
     }
 
-
-    // --- Andatti Logic (unchanged, but added frame count to logs) ---
+    // --- Lógica Andatti (sin cambios, logs simplificados) ---
     public void ConsumeAndatti() {
         if (!andatti) {
              andatti = true;
-             Debug.Log($"ConsumeAndatti called at Frame {Time.frameCount}. Pausing health decrease."); // Use Debug.Log directly for events
+             Debug.Log($"ConsumableController -> ConsumeAndatti llamado en Frame {Time.frameCount}. Pausando descenso.");
              Invoke(nameof(ResetAndatti), 5f);
         }
     }
     private void ResetAndatti() {
         andatti = false;
-         Debug.Log($"ResetAndatti called at Frame {Time.frameCount}. Resuming health decrease."); // Use Debug.Log directly for events
+         Debug.Log($"HealthController -> ResetAndatti llamado en Frame {Time.frameCount}. Reanudando descenso.");
     }
-    // --- End Andatti Logic ---
+    // --- Fin Lógica Andatti ---
 }

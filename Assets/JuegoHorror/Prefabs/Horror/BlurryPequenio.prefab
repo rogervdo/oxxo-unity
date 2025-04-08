@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7316536224970278073}
   - component: {fileID: 5444108139972373739}
   m_Layer: 0
-  m_Name: Blurry1
+  m_Name: BlurryPequenio
   m_TagString: Anomaly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 1977796225969697734}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.7992, y: 0.124, z: 0}
-  m_LocalScale: {x: -0.62, y: 0.62561107, z: 0.6666667}
+  m_LocalPosition: {x: -2.0228, y: 0.2807, z: 0}
+  m_LocalScale: {x: -0.309442, y: 0.31224248, z: 0.33273333}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}

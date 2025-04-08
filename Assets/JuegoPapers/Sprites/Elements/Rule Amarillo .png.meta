@@ -186,7 +186,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Rule Amarillo _0: 7352607153630497436
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

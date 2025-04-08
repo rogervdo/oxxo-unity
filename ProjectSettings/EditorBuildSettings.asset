@@ -39,25 +39,25 @@ EditorBuildSettings:
     path: Assets/Scenes/Juego3/PP_Win.unity
     guid: 9d6acf01626ec9b488e1e79b68c88f88
   - enabled: 1
-    path: Assets/Scenes/Espacio/SpaceMenu.unity
+    path: Assets/Scenes/Espacio/SCENES/SpaceMenu.unity
     guid: 2f3b5b9c2327bfd49a8d26aee957f6a5
   - enabled: 1
-    path: Assets/Scenes/Espacio/SpaceSelection.unity
+    path: Assets/Scenes/Espacio/SCENES/SpaceSelection.unity
     guid: f1aebf60f4cdb9645bbe5affa2ca6509
   - enabled: 1
-    path: Assets/Scenes/Espacio/SpaceshipGame2/VJ_Nave.unity
+    path: Assets/Scenes/Espacio/SCENES/VJ_Nave.unity
     guid: a0ad4af30105f394fb5f08667e4982c7
   - enabled: 1
-    path: Assets/Scenes/Espacio/QuestionsGame/QuestionsGame2/EngineRoom_Q.unity
+    path: Assets/Scenes/Espacio/SCENES/QuestionsGame/QuestionsGame2/EngineRoom_Q.unity
     guid: aa1eb5e6d0d77da46911d6c7ca4e6c18
   - enabled: 1
-    path: Assets/Scenes/Espacio/QuestionsGame2/ControlRoom_Q.unity
+    path: Assets/Scenes/Espacio/SCENES/QuestionsGame2/ControlRoom_Q.unity
     guid: 4637b420a500e9c41b03738a47fa9ec9
   - enabled: 1
-    path: Assets/Scenes/Espacio/QuestionsGame/Escena_Perder_S.unity
+    path: Assets/Scenes/Espacio/SCENES/QuestionsGame/Escena_Perder_S.unity
     guid: 4c9d8e427084a314a8a914f8e327c284
   - enabled: 1
-    path: Assets/Scenes/Espacio/SpaceshipGame/Escena_Ganar_S.unity
+    path: Assets/Scenes/Espacio/SCENES/SpaceshipGame/Escena_Ganar_S.unity
     guid: 5761ee144f26b0448bc8addec5277a35
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

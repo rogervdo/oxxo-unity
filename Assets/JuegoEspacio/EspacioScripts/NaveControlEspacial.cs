@@ -15,20 +15,37 @@ public class NaveControlEspacial : MonoBehaviour
 
     void Update()
     {
-        if(rig.linearVelocity.x >0)
+        Vector2 direction = rig.linearVelocity;
+
+        if (direction.magnitude > 0.1f) // Solo si se mueve
         {
-            sr.flipX = false; //Mover el sprite del personaje a la derecha
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            // Limita el ángulo a un rango razonable (por ejemplo, de -90° a +90°)
+            angle = Mathf.Clamp(angle, -25f, 25f);
+
+            // Suaviza la rotación hacia el ángulo deseado
+            Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
         }
-        else if (rig.linearVelocity.x <0)
+        else
         {
-            sr.flipX = true;//Mover el sprite del personaje a la izquierda
+            // Si no se mueve, regresa lentamente a 0°
+            Quaternion targetRotation = Quaternion.Euler(0, 0, 0);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 2f);
         }
     }
+
+
+
 
     private void FixedUpdate()
     {
         float xInput = Input.GetAxis("Horizontal");
-        rig.linearVelocity = new Vector2(xInput*movespeed, rig.linearVelocity.y);
+    float yInput = Input.GetAxis("Vertical");
+    rig.linearVelocity = new Vector2(xInput * movespeed, yInput * movespeed);
+
+
          if(xInput != 0 && rig.linearVelocity.y == 0)
         {
             UpdateAnimation(PlayerAnimation.ForwardEspacio);//Animacion para caminar

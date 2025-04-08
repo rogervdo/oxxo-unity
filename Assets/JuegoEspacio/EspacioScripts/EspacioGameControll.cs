@@ -50,7 +50,7 @@ public class EspacioGameControll : MonoBehaviour
     {
         int newLives = GetCurrentLives() - 1;
         PlayerPrefs.SetInt("lives", newLives);
-        //uiConroller.UpdateLives(); 
+        uiConroller.UpdateLives(); 
         checkGameOver();
     }
 
@@ -66,7 +66,7 @@ public class EspacioGameControll : MonoBehaviour
     // Activa la escena de fin de juego
     public void ActiveEndScene()
     {
-        SceneManager.LoadScene("EndScene");
+        SceneManager.LoadScene("Escena_Perder_S");
     }
 
     // Configura referencias de objetos adicionales

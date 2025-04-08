@@ -1,54 +1,50 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; // <--- Necesario para SceneManager
+using System.Collections;       // <--- Necesario para IEnumerator (Coroutines)
 
-// Asegura que el GameObject tenga un AudioSource adjunto.
-// Si no lo tiene al añadir este script, Unity lo añadirá automáticamente.
-[RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(AudioSource))] // Asegura que haya un AudioSource
 public class HealthController : MonoBehaviour
 {
-    // --- Variables de Configuración ---
+    // --- Variables Públicas (Asignar en Inspector) ---
     public Image healthBarFill;
     public float maxHealth = 100f;
     public float decreaseRate = 3f;
-    public GameObject screamerImageObject;
-    public AudioClip screamerSoundClip; // <<-- NUEVO: Asigna tu archivo de sonido aquí en el Inspector.
+    public GameObject screamerImageObject; // El GameObject de la imagen del screamer
+    public AudioClip screamerSoundClip; // El sonido del screamer
 
     // --- Variables Internas ---
     private float currentHealth;
     private bool andatti = false;
     private bool healthChangedThisFrame = false;
     private bool isGameOver = false;
-    private AudioSource audioSource; // <<-- NUEVO: Referencia al componente AudioSource.
+    private AudioSource audioSource; // Para reproducir el sonido
 
     void Start()
     {
-        // Obtiene la referencia al componente AudioSource de este GameObject.
+        // Obtiene el AudioSource
         audioSource = GetComponent<AudioSource>();
-        // Configuración inicial opcional del AudioSource
         if(audioSource != null) {
-            audioSource.playOnAwake = false; // No sonar al inicio
-            // audioSource.spatialBlend = 0f; // Sonido 2D
+            audioSource.playOnAwake = false;
         } else {
-             Debug.LogError("HealthController no encontró el componente AudioSource requerido!", this);
+             Debug.LogError("HealthController necesita un componente AudioSource!", this);
         }
 
-
+        // Inicialización normal
         currentHealth = maxHealth;
         andatti = false;
         isGameOver = false;
-
         if (screamerImageObject != null) {
-            screamerImageObject.SetActive(false);
-        } else {
-            Debug.LogWarning("Referencia a 'screamerImageObject' no asignada.", this);
+            screamerImageObject.SetActive(false); // Asegura que esté oculto al inicio
         }
         UpdateHealthBar();
     }
 
     void Update()
     {
-        if (isGameOver) return;
+        if (isGameOver) return; // No hacer nada si ya terminó el juego
 
+        // Descenso de vida
         if (!andatti) {
             float previousHealth = currentHealth;
             currentHealth -= decreaseRate * Time.deltaTime;
@@ -58,6 +54,7 @@ public class HealthController : MonoBehaviour
             }
         }
 
+        // Prueba con Espacio
         if (Input.GetKeyDown(KeyCode.Space)) {
            AddHealth(10f);
         }
@@ -71,12 +68,14 @@ public class HealthController : MonoBehaviour
             UpdateHealthBar();
             healthChangedThisFrame = false;
 
+            // Comprueba si la vida llegó a cero
             if (currentHealth <= 0f) {
-                TriggerGameOverSequence();
+                TriggerGameOverSequence(); // Inicia la secuencia de fin
             }
         }
     }
 
+    // Añade vida
     public void AddHealth(float amountToAdd) {
         if (isGameOver || amountToAdd <= 0) return;
         float previousHealth = currentHealth;
@@ -89,44 +88,58 @@ public class HealthController : MonoBehaviour
         }
     }
 
+    // Actualiza la barra visual
     private void UpdateHealthBar() {
         if (healthBarFill != null && maxHealth > 0) {
             healthBarFill.fillAmount = Mathf.Clamp01(currentHealth / maxHealth);
         }
     }
 
+    // Inicia la secuencia del screamer y Game Over
     private void TriggerGameOverSequence() {
-        if (isGameOver) return;
+        if (isGameOver) return; // Evita ejecución múltiple
         isGameOver = true;
-        Debug.Log("¡Vida a cero! Mostrando Screamer y reproduciendo sonido...");
+        Debug.Log("¡Vida a cero! Iniciando secuencia Game Over...");
 
-        // Activa imagen
+        // Muestra el Screamer
         if (screamerImageObject != null) {
             screamerImageObject.SetActive(true);
         }
 
-        // --- REPRODUCIR SONIDO ---
-        // Comprueba si tenemos AudioSource y un clip asignado.
+        // Reproduce Sonido
         if (audioSource != null && screamerSoundClip != null) {
-            // Reproduce el clip una vez. No interrumpe otros sonidos
-            // que pudiera estar reproduciendo este AudioSource (si los hubiera).
             audioSource.PlayOneShot(screamerSoundClip);
-        } else if (screamerSoundClip == null) {
-             Debug.LogWarning("No se asignó 'screamerSoundClip' en el Inspector de HealthController.", this);
         }
-        // --- FIN REPRODUCIR SONIDO ---
 
-
-        // Pausar juego
+        // Pausa el juego AHORA
         Time.timeScale = 0f;
 
-        // Otras acciones opcionales...
+        // --- NUEVO: Inicia la Coroutine para cambiar de escena ---
+        StartCoroutine(LoadGameOverAfterDelay(3.0f)); // Llama a la coroutine con 3 segundos de espera
     }
 
+    // --- NUEVO: Coroutine para esperar y cargar la escena ---
+    private IEnumerator LoadGameOverAfterDelay(float delay)
+    {
+        Debug.Log($"Esperando {delay} segundos de tiempo real antes de cargar Game Over...");
 
-    // --- Lógica Andatti (sin cambios) ---
+        // Espera 'delay' segundos, ignorando la escala de tiempo (Time.timeScale)
+        yield return new WaitForSecondsRealtime(delay);
+
+        Debug.Log("Tiempo de espera finalizado. Restaurando TimeScale y cargando HR_GameOver...");
+
+        // ¡¡MUY IMPORTANTE!! Restaurar la escala de tiempo antes de cargar la nueva escena.
+        Time.timeScale = 1f;
+
+        // Cargar la escena de Game Over por su nombre
+        SceneManager.LoadScene("HR_GameOver");
+    }
+    // --- FIN Coroutine ---
+
+
+    // --- Lógica Andatti ---
     public void ConsumeAndatti() {
-        if (isGameOver || !andatti) {
+        if (isGameOver || !andatti) { // No consumir si el juego terminó
              if(!isGameOver) andatti = true;
              if(andatti) Invoke(nameof(ResetAndatti), 5f);
         }

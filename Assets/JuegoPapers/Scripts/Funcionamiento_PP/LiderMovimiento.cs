@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class LiderMovimiento : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class LiderMovimiento : MonoBehaviour
 
 
 
-    private System.Collections.IEnumerator EntrarLider()
+    private IEnumerator EntrarLider()
     {
         enMovimiento = true;
         while (Vector2.Distance(liderTransform.anchoredPosition, posicionCentro) > 0.1f)
@@ -39,7 +40,7 @@ public class LiderMovimiento : MonoBehaviour
         StartCoroutine(SalirLiderAnimado());
     }
 
-    private System.Collections.IEnumerator SalirLiderAnimado()
+    private IEnumerator SalirLiderAnimado()
     {
         enMovimiento = true;
         esperandoDecision = false;

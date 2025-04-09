@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class IndicadoresController : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class IndicadoresController : MonoBehaviour
         StartCoroutine(MoverHoja());
     }
 
-    private System.Collections.IEnumerator MoverHoja()
+    private IEnumerator MoverHoja()
     {
         enTransicion = true;
 

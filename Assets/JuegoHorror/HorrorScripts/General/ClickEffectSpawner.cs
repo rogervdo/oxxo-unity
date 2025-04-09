@@ -4,108 +4,119 @@ using UnityEngine.EventSystems; // Necesario para comprobar clics sobre la UI
 public class ClickEffectSpawner : MonoBehaviour
 {
     // --- Variables Públicas (Asignar en Inspector) ---
-    public GameObject clickEffectPrefab;    // Prefab del efecto visual al hacer clic normal.
-    public GameObject heartEffectPrefab;    // Prefab del efecto visual (corazón) al hacer clic en anomalía.
-    public HealthController healthController; // Referencia al script que controla la vida/tiempo.
-    public float healthToAddOnClick = 15.0f; // Vida/tiempo a añadir al hacer clic en anomalía.
+    [Header("Effects")] // Puedes quitar [Header]
+    public GameObject clickEffectPrefab;    // Efecto de clic normal
+    public GameObject heartEffectPrefab;    // Efecto al destruir anomalía
+
+    [Header("Game Logic References")] // Puedes quitar [Header]
+    public HealthController healthController; // Referencia al controlador de vida
+    public float healthToAddOnClick = 15.0f; // Vida a añadir por clic
+
+    [Header("Spawner Reference")] // Puedes quitar [Header]
+    public AnomalySpawner anomalySpawner; // Referencia al gestor de anomalías
 
     // --- Variables Privadas ---
-    private Camera mainCamera; // Referencia a la cámara principal (cacheada).
+    private Camera mainCamera; // Referencia a la cámara principal
 
     // Se llama una vez al inicio.
     void Start()
     {
-        // Guarda la referencia a la cámara principal para eficiencia.
-        mainCamera = Camera.main;
+        mainCamera = Camera.main; // Guarda referencia a la cámara
+
+        // Comprueba si las referencias importantes fueron asignadas en el Inspector.
+        if (healthController == null) {
+             Debug.LogError("Referencia 'healthController' no asignada en ClickEffectSpawner!", this);
+        }
+        if (anomalySpawner == null) {
+             Debug.LogError("Referencia 'anomalySpawner' no asignada en ClickEffectSpawner!", this);
+        }
+        if (clickEffectPrefab == null) {
+             Debug.LogWarning("Referencia 'clickEffectPrefab' no asignada.", this);
+        }
+         if (heartEffectPrefab == null) {
+             Debug.LogWarning("Referencia 'heartEffectPrefab' no asignada.", this);
+        }
     }
 
     // Se llama cada fotograma.
     void Update()
     {
-        // Comprueba si se presionó el botón izquierdo del ratón.
+        // Comprueba clic izquierdo.
         if (Input.GetMouseButtonDown(0))
         {
-            // 1. Ignora el clic si está sobre un elemento de la UI.
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            {
+            // Ignora si es sobre UI.
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) {
                 return;
             }
 
-            // 2. Obtiene la posición del clic en el mundo del juego.
+            // Obtiene posición en el mundo.
             Vector3 worldPosition = GetClickWorldPosition();
-            if (worldPosition == Vector3.positiveInfinity) // Si hubo error al obtener la posición
-            {
-                return;
-            }
+            if (worldPosition == Vector3.positiveInfinity) { return; } // Sale si hay error
 
-            // 3. Lanza un rayo en la posición del clic para ver qué objeto 2D hay.
+            // Lanza rayo.
             RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero);
+            bool anomalyClicked = false;
 
-            bool anomalyClicked = false; // Indica si se hizo clic en una anomalía este fotograma.
-
-            // 4. Comprueba si el rayo golpeó algún objeto con Collider2D.
+            // Si golpea algo...
             if (hit.collider != null)
             {
-                // 5. Comprueba si el objeto golpeado tiene la etiqueta "Anomaly".
+                // Y ese algo es una anomalía...
                 if (hit.collider.CompareTag("Anomaly"))
                 {
-                    anomalyClicked = true; // Marca que se clickeó una anomalía.
+                    anomalyClicked = true;
+                    GameObject anomalyToDestroy = hit.collider.gameObject; // Guarda referencia antes de destruir
 
                     // --- Lógica al Cliquear Anomalía ---
-                    // a. Genera el efecto de corazón en la posición del clic.
-                    SpawnHeartEffect(worldPosition);
-                    // b. Añade vida/tiempo llamando al HealthController.
-                    AddHealth(healthToAddOnClick);
-                    // c. Destruye el objeto de la anomalía.
-                    Destroy(hit.collider.gameObject);
+                    SpawnHeartEffect(worldPosition); // Efecto corazón
+                    // AddHealth(healthToAddOnClick);    // Añade vida
+
+                    // Notifica al Spawner que esta anomalía será destruida.
+                    if (anomalySpawner != null) {
+                        anomalySpawner.NotifyAnomalyDestroyed(anomalyToDestroy);
+                    }
+
+                    Destroy(anomalyToDestroy); // Destruye la anomalía
                     // --- Fin Lógica Anomalía ---
                 }
             }
 
-            // 6. Genera el efecto de clic normal SOLAMENTE si NO se hizo clic en una anomalía.
-            if (!anomalyClicked)
-            {
+            // Si NO se hizo clic en una anomalía, muestra efecto normal.
+            if (!anomalyClicked) {
                 SpawnClickEffect(worldPosition);
             }
         }
     }
 
-    // Convierte la posición del ratón en pantalla a una posición en el mundo 2D (plano Z=0).
-    Vector3 GetClickWorldPosition()
-    {
-        if (mainCamera == null) return Vector3.positiveInfinity; // Retorna error si no hay cámara
-
+    // --- Métodos Auxiliares ---
+    Vector3 GetClickWorldPosition() {
+        if (mainCamera == null) {
+             Debug.LogError("ClickEffectSpawner: Cámara principal perdida.", this);
+             return Vector3.positiveInfinity;
+        }
         Vector3 screenPosition = Input.mousePosition;
-        screenPosition.z = 0f - mainCamera.transform.position.z; // Ajusta Z para la conversión
+        screenPosition.z = 0f - mainCamera.transform.position.z;
         Vector3 worldPosition = mainCamera.ScreenToWorldPoint(screenPosition);
-        worldPosition.z = 0f; // Asegura que esté en el plano Z=0
+        worldPosition.z = 0f;
         return worldPosition;
     }
 
-    // Crea una instancia del prefab de efecto de clic normal en la posición dada.
-    void SpawnClickEffect(Vector3 position)
-    {
-        if (clickEffectPrefab != null)
-        {
+    void SpawnClickEffect(Vector3 position) {
+        if (clickEffectPrefab != null) {
             Instantiate(clickEffectPrefab, position, Quaternion.identity);
         }
     }
 
-    // Crea una instancia del prefab de efecto de corazón en la posición dada.
-    void SpawnHeartEffect(Vector3 position)
-    {
-        if (heartEffectPrefab != null)
-        {
+    void SpawnHeartEffect(Vector3 position) {
+        if (heartEffectPrefab != null) {
             Instantiate(heartEffectPrefab, position, Quaternion.identity);
         }
     }
 
-    // Llama al método AddHealth del HealthController asignado.
-    void AddHealth(float amount)
-    {
-        if (healthController != null)
-        {
+    void AddHealth(float amount) {
+        if (healthController != null) {
             healthController.AddHealth(amount);
+        } else {
+             // El error ya se loguea en Start si falta
         }
     }
 }

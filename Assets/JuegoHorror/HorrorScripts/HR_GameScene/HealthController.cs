@@ -1,10 +1,11 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using System.Collections;
+using UnityEngine.UI;          // Para Image, Text
+using UnityEngine.SceneManagement; // Para cargar escenas
+using System.Collections;       // Para Coroutines (IEnumerator)
+// using TMPro;                 // Descomenta si usas TextMeshPro en lugar de Text
 
-// Asegura que el GameObject tenga al menos un AudioSource (para el screamer principalmente).
-// El script añadirá un segundo AudioSource para el latido.
+// Asegura que haya al menos un AudioSource (para el screamer/efectos one-shot).
+// El script añadirá un segundo AudioSource si es necesario para el latido.
 [RequireComponent(typeof(AudioSource))]
 public class HealthController : MonoBehaviour
 {
@@ -15,10 +16,12 @@ public class HealthController : MonoBehaviour
     public Image healthBarFill;
     [Tooltip("El GameObject con la imagen del screamer (debe estar desactivado inicialmente).")]
     public GameObject screamerImageObject;
-    [Tooltip("Referencia al script AnomalySpawner para obtener el conteo.")]
+    [Tooltip("Referencia al script AnomalySpawner para obtener el conteo de anomalías.")]
     public AnomalySpawner anomalySpawner;
     [Tooltip("El componente Text (o TextMeshProUGUI) para mostrar el puntaje.")]
-    public Text scoreText; // O: public TMPro.TextMeshProUGUI scoreText;
+    public Text scoreText; // O si usas TextMeshPro: public TMPro.TextMeshProUGUI scoreText;
+    [Tooltip("El AudioSource que reproduce la música/ambiente principal. Asignar en Inspector.")]
+    public AudioSource mainMusicAudioSource;
 
     [Header("Vida y Descenso")]
     [Tooltip("Vida máxima inicial.")]
@@ -31,52 +34,59 @@ public class HealthController : MonoBehaviour
     [Header("Sonido")]
     [Tooltip("Sonido que se reproduce al morir (screamer).")]
     public AudioClip screamerSoundClip;
-    [Tooltip("Sonido de latido del corazón.")]
+    [Tooltip("Sonido de latido del corazón (debe ser un loop corto idealmente).")]
     public AudioClip heartbeatSoundClip;
     [Tooltip("Porcentaje de vida (0.0 a 1.0) por debajo del cual empieza el latido.")]
     [Range(0f, 1f)]
-    public float heartbeatStartThreshold = 0.3f; // 30%
-    [Tooltip("Velocidad (pitch) mínima del latido.")]
+    public float heartbeatStartThreshold = 0.3f; // Ej: 30%
+    [Tooltip("Velocidad (pitch) mínima del latido (1 = normal).")]
     public float minHeartbeatPitch = 0.8f;
     [Tooltip("Velocidad (pitch) máxima del latido (cuando la vida está cerca de 0).")]
     public float maxHeartbeatPitch = 2.0f;
+    [Tooltip("Volumen máximo que alcanzará el latido (0 a 1).")]
+    [Range(0f, 1f)]
+    public float maxHeartbeatVolume = 1.0f;
+    [Tooltip("A qué fracción del volumen original bajará la música (0=silencio, 0.1=10%).")]
+    [Range(0f, 1f)]
+    public float loweredMusicVolumeMultiplier = 0.1f; // Multiplicador para volumen bajo música
 
     [Header("Puntaje")]
     [Tooltip("Puntos ganados por cada segundo de supervivencia.")]
     public float pointsPerSecond = 10f;
 
-    // --- Variables Internas ---
+    // --- Variables Internas (No tocar en Inspector) ---
     private float currentHealth;                  // Vida actual
     private bool andatti = false;                 // Efecto Andatti activo?
-    private bool healthChangedThisFrame = false;  // ¿Cambió vida este frame?
+    private bool healthChangedThisFrame = false;  // ¿Cambió vida este frame? (Para actualizar UI)
     private bool isGameOver = false;              // ¿Terminó el juego?
-    private AudioSource audioSource;              // Para sonidos 'one-shot' (screamer)
-    private AudioSource heartbeatAudioSource;     // Para el loop del latido
+    private AudioSource audioSource;              // AudioSource principal (para screamer/one-shots)
+    private AudioSource heartbeatAudioSource;     // AudioSource dedicado al loop del latido
     private float currentScore = 0f;              // Puntaje actual
+    private float initialMusicVolume;             // Volumen original de la música principal
 
-    // --- Métodos de Unity ---
+    // --- Métodos de Ciclo de Vida de Unity ---
 
     void Start()
     {
-        // Configuración inicial del AudioSource principal (requerido por [RequireComponent])
+        // Obtiene el AudioSource principal
         audioSource = GetComponent<AudioSource>();
-        if (audioSource != null) {
-            audioSource.playOnAwake = false; // No queremos que suene nada al inicio
-        } else {
-             // Esto no debería pasar debido a RequireComponent, pero por si acaso
-             Debug.LogError("¡Falta el componente AudioSource principal!", this);
-        }
+        if (audioSource != null) audioSource.playOnAwake = false;
+        else Debug.LogError("¡HealthController necesita un componente AudioSource principal!", this);
 
-        // Configuración del AudioSource secundario para el latido
+        // Configura el AudioSource secundario para el latido
         SetupHeartbeatAudioSource();
 
-        // Inicialización del estado del juego
+        // Guarda el volumen inicial de la música si está asignada
+        if (mainMusicAudioSource != null) initialMusicVolume = mainMusicAudioSource.volume;
+        else initialMusicVolume = 1f; // Valor por defecto si no se asigna
+
+        // Inicializa el estado del juego
         currentHealth = maxHealth;
         currentScore = 0f;
         andatti = false;
         isGameOver = false;
 
-        // Comprobación y configuración inicial de UI y otros elementos
+        // Comprueba referencias críticas y configura estado inicial de UI
         CheckReferences();
         if (screamerImageObject != null) screamerImageObject.SetActive(false);
         UpdateHealthBar();
@@ -85,110 +95,105 @@ public class HealthController : MonoBehaviour
 
     void Update()
     {
-        // No ejecutar lógica de juego si ya terminó
-        if (isGameOver) return;
+        if (isGameOver) return; // No hacer nada si el juego terminó
 
-        // Actualiza el puntaje basado en el tiempo
-        UpdateScore();
-
-        // Actualiza la vida basado en anomalías y tiempo
-        UpdateHealthDrain();
-
-        // Actualiza el sonido del latido basado en la vida actual
-        UpdateHeartbeatSound();
+        UpdateScore();         // Actualiza puntaje
+        UpdateHealthDrain();     // Actualiza descenso de vida
+        UpdateHeartbeatSound();  // Actualiza sonido latido y música
 
         // (Prueba opcional con barra espaciadora)
         if (Input.GetKeyDown(KeyCode.Space)) { AddHealth(10f); }
     }
 
-    // Actualizaciones visuales (UI) se hacen en LateUpdate
+    // Actualiza UI en LateUpdate para reflejar cambios del frame
     void LateUpdate()
     {
         if (isGameOver) return;
-
-        // Si la vida cambió este fotograma, actualiza la barra
         if (healthChangedThisFrame)
         {
-            UpdateHealthBar();
-            healthChangedThisFrame = false; // Resetea la bandera
-
-            // Comprueba si el jugador murió después de la actualización
-            if (currentHealth <= 0f)
-            {
-                TriggerGameOverSequence();
-            }
+            UpdateHealthBar(); // Actualiza barra visual
+            healthChangedThisFrame = false; // Resetea bandera
+            // Comprueba condición de muerte
+            if (currentHealth <= 0f) TriggerGameOverSequence();
         }
     }
 
-    // --- Lógica Principal ---
+    // --- Lógica Principal del Controlador ---
 
-    // Configura el segundo AudioSource para el latido
+    // Añade y configura el AudioSource para el latido.
     void SetupHeartbeatAudioSource() {
-         heartbeatAudioSource = gameObject.AddComponent<AudioSource>(); // Añade un nuevo AudioSource
+         heartbeatAudioSource = gameObject.AddComponent<AudioSource>();
          if (heartbeatSoundClip != null) {
              heartbeatAudioSource.clip = heartbeatSoundClip;
              heartbeatAudioSource.loop = true;
              heartbeatAudioSource.playOnAwake = false;
-             heartbeatAudioSource.volume = 1f; // Ajusta si es necesario
+             heartbeatAudioSource.volume = 0f; // Empieza en silencio
              heartbeatAudioSource.pitch = minHeartbeatPitch;
-             // heartbeatAudioSource.spatialBlend = 0f; // Sonido 2D
          } else {
              Debug.LogWarning("No se asignó 'heartbeatSoundClip'. El sonido de latido no funcionará.", this);
-             heartbeatAudioSource.enabled = false; // Desactiva si no hay clip
+             if(heartbeatAudioSource != null) heartbeatAudioSource.enabled = false;
          }
     }
 
-    // Comprueba si las referencias clave están asignadas en el Inspector
+    // Comprueba si las referencias necesarias están asignadas en el Inspector
     void CheckReferences() {
-        if (anomalySpawner == null) Debug.LogError("¡Referencia 'anomalySpawner' no asignada!", this);
+        if (anomalySpawner == null) Debug.LogError("Referencia 'anomalySpawner' no asignada.", this);
         if (scoreText == null) Debug.LogWarning("Referencia 'scoreText' no asignada.", this);
         if (screamerImageObject == null) Debug.LogWarning("Referencia 'screamerImageObject' no asignada.", this);
         if (screamerSoundClip == null) Debug.LogWarning("Referencia 'screamerSoundClip' no asignada.", this);
-        if (healthBarFill == null) Debug.LogError("¡Referencia 'healthBarFill' no asignada!", this);
+        if (healthBarFill == null) Debug.LogError("Referencia 'healthBarFill' no asignada.", this);
+        if (mainMusicAudioSource == null) Debug.LogWarning("Referencia 'mainMusicAudioSource' no asignada.", this);
+        if (heartbeatSoundClip == null && heartbeatAudioSource != null && heartbeatAudioSource.enabled) Debug.LogWarning("Referencia 'heartbeatSoundClip' no asignada", this); // Aviso extra
     }
 
-    // Calcula y aplica el descenso de vida
+    // Calcula y aplica el descenso de vida basado en anomalías
     void UpdateHealthDrain() {
-        if (!andatti) // Solo si no está activo el efecto Andatti
-        {
+        if (!andatti) {
             float previousHealth = currentHealth;
             int activeAnomalyCount = (anomalySpawner != null) ? anomalySpawner.ActiveAnomalyCount : 0;
             float totalDecrease = baseDecreaseRate + (activeAnomalyCount * drainPerAnomaly);
-
-            if (totalDecrease > 0 && currentHealth > 0) // Aplica solo si hay descenso y vida > 0
-            {
+            if (totalDecrease > 0 && currentHealth > 0) {
                 currentHealth -= totalDecrease * Time.deltaTime;
-                currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Limita a 0-max
-
-                if (currentHealth != previousHealth) {
-                    healthChangedThisFrame = true; // Marca para actualizar UI
-                }
+                currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+                if (currentHealth != previousHealth) healthChangedThisFrame = true;
             }
         }
     }
 
-    // Incrementa el puntaje con el tiempo
+    // Incrementa el puntaje basado en el tiempo
     void UpdateScore() {
         currentScore += pointsPerSecond * Time.deltaTime;
-        UpdateScoreDisplay(); // Actualiza la UI del puntaje
+        UpdateScoreDisplay();
     }
 
-    // Controla el sonido del latido (inicio, parada, pitch)
+    // Ajusta el pitch/volumen del latido y el volumen de la música principal
     void UpdateHeartbeatSound() {
-        if (heartbeatAudioSource == null || !heartbeatAudioSource.enabled || isGameOver) {
-            // Detiene si ya no es válido o terminó el juego
-            if (heartbeatAudioSource != null && heartbeatAudioSource.isPlaying) heartbeatAudioSource.Stop();
-            return;
+        bool canPlayHeartbeat = (heartbeatAudioSource != null && heartbeatAudioSource.enabled && !isGameOver);
+        float healthRatio = (maxHealth > 0) ? Mathf.Clamp01(currentHealth / maxHealth) : 0f;
+        float progress = 1f - Mathf.Clamp01(healthRatio / heartbeatStartThreshold); // 0=umbral, 1=cerca de 0 vida
+
+        // --- Ajustar Sonido Latido ---
+        if (canPlayHeartbeat && healthRatio <= heartbeatStartThreshold && currentHealth > 0) { // Debajo umbral y vivo
+            heartbeatAudioSource.pitch = Mathf.Lerp(minHeartbeatPitch, maxHeartbeatPitch, progress); // Acelera pitch
+            heartbeatAudioSource.volume = maxHeartbeatVolume; // Volumen latido al máximo
+            if (!heartbeatAudioSource.isPlaying) heartbeatAudioSource.Play(); // Inicia si no sonaba
+        } else { // Encima del umbral, muerto, o no usable
+            if (heartbeatAudioSource != null && heartbeatAudioSource.isPlaying) {
+                 heartbeatAudioSource.Stop(); // Detiene latido
+                 heartbeatAudioSource.volume = 0f; // Silencia al parar
+            }
         }
 
-        float healthRatio = (maxHealth > 0) ? (currentHealth / maxHealth) : 0f;
-
-        if (healthRatio <= heartbeatStartThreshold && currentHealth > 0) { // Por debajo del umbral y vivo
-            float progress = 1f - Mathf.Clamp01(healthRatio / heartbeatStartThreshold);
-            heartbeatAudioSource.pitch = Mathf.Lerp(minHeartbeatPitch, maxHeartbeatPitch, progress);
-            if (!heartbeatAudioSource.isPlaying) heartbeatAudioSource.Play(); // Inicia si no sonaba
-        } else { // Por encima del umbral o muerto
-            if (heartbeatAudioSource.isPlaying) heartbeatAudioSource.Stop(); // Detiene si sonaba
+        // --- Ajustar Volumen Música Principal ---
+        if (mainMusicAudioSource != null) {
+            if (healthRatio <= heartbeatStartThreshold && currentHealth > 0 && !isGameOver) { // Dentro del umbral y vivo
+                // <<< CAMBIO AQUÍ: Interpola volumen música gradualmente >>>
+                mainMusicAudioSource.volume = Mathf.Lerp(initialMusicVolume, initialMusicVolume * loweredMusicVolumeMultiplier, progress);
+            } else if (!isGameOver) { // Encima del umbral y no es game over
+                // Restaura volumen música al original
+                 mainMusicAudioSource.volume = initialMusicVolume;
+            }
+            // Si es Game Over, el volumen se quedará como estaba (probablemente bajo tras el Trigger)
         }
     }
 
@@ -196,22 +201,20 @@ public class HealthController : MonoBehaviour
 
     // Añade vida (llamado externamente)
     public void AddHealth(float amountToAdd) {
-        if (isGameOver || amountToAdd <= 0) return; // No hacer nada si terminó o no es positivo
+        if (isGameOver || amountToAdd <= 0) return;
         float previousHealth = currentHealth;
         if (currentHealth < maxHealth) {
             currentHealth += amountToAdd;
             currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-            if (currentHealth != previousHealth) {
-                healthChangedThisFrame = true; // Marca para actualizar UI
-            }
+            if (currentHealth != previousHealth) healthChangedThisFrame = true;
         }
     }
 
-    // Activa el efecto Andatti (pausa descenso de vida)
+    // Activa el efecto Andatti
     public void ConsumeAndatti() {
         if (isGameOver || !andatti) {
              if(!isGameOver) andatti = true;
-             if(andatti) Invoke(nameof(ResetAndatti), 5f); // Desactivar después de 5 seg
+             if(andatti) Invoke(nameof(ResetAndatti), 5f);
         }
     }
 
@@ -235,38 +238,28 @@ public class HealthController : MonoBehaviour
 
     // Inicia el fin del juego
     private void TriggerGameOverSequence() {
-        if (isGameOver) return; // Ejecutar solo una vez
+        if (isGameOver) return;
         isGameOver = true;
-
-        // Guardar puntaje final
-        PlayerPrefs.SetInt("LastScore", Mathf.FloorToInt(currentScore));
-        PlayerPrefs.Save();
-        Debug.Log($"Puntaje final guardado: {PlayerPrefs.GetInt("LastScore")}");
-
-        // Activar efectos visuales y sonoros
+        Debug.Log("¡Vida a cero! Iniciando secuencia Game Over...");
+        PlayerPrefs.SetInt("LastScore", Mathf.FloorToInt(currentScore)); PlayerPrefs.Save();
         if (screamerImageObject != null) screamerImageObject.SetActive(true);
         if (audioSource != null && screamerSoundClip != null) audioSource.PlayOneShot(screamerSoundClip);
-        if (heartbeatAudioSource != null && heartbeatAudioSource.isPlaying) heartbeatAudioSource.Stop(); // Detiene latido
-
-        // Pausa el juego
+        if (heartbeatAudioSource != null && heartbeatAudioSource.isPlaying) heartbeatAudioSource.Stop();
+        if (mainMusicAudioSource != null) mainMusicAudioSource.Stop(); // Detiene música
         Time.timeScale = 0f;
-
-        // Inicia coroutine para cargar escena de Game Over
         StartCoroutine(LoadGameOverAfterDelay(3.0f));
     }
 
     // Coroutine para esperar tiempo real y cargar escena
     private IEnumerator LoadGameOverAfterDelay(float delay) {
-        // Debug.Log($"Esperando {delay} segundos (tiempo real)...");
-        yield return new WaitForSecondsRealtime(delay); // Espera ignorando Time.timeScale
-
-        // Debug.Log("Restaurando TimeScale y cargando HR_GameOver...");
+        yield return new WaitForSecondsRealtime(delay);
         Time.timeScale = 1f; // ¡¡Restaurar TimeScale ANTES de cargar!!
-        SceneManager.LoadScene("HR_GameOver"); // Carga la escena
+        SceneManager.LoadScene("HR_GameOver");
     }
 
     // Desactiva el efecto Andatti (llamado por Invoke)
     private void ResetAndatti() {
         andatti = false;
     }
-}
+
+} // Fin de la clase HealthController

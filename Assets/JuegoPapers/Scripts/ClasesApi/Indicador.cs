@@ -8,5 +8,11 @@ public class Indicador
     public string unidad;
     public string categoria;
     public int impacto_total;
+
+    public Indicador(string nombre, int valor)
+    {
+        this.nombre = nombre;
+        this.impacto_total = valor;
+    }
 }
 

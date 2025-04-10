@@ -8,7 +8,15 @@ using System.Linq;
 public class OpcionesManager : MonoBehaviour
 {
     public GameObject[] botonesOpciones; // Asigna ButtonOption1, 2 y 3 desde el inspector
+    private Button[] botones;
+
     public UIManager uiManager; // Arrastra el UIManager aquí desde Unity
+    public ImpactoView impactoViewer;
+
+    private void Awake()
+    {
+        botones = botonesOpciones.Select(b => b.GetComponent<Button>()).ToArray();
+    }
 
     public void CargarOpcionesParaCaso(int idCaso)
     {
@@ -19,7 +27,7 @@ public class OpcionesManager : MonoBehaviour
     {
         string url = $"https://10.22.169.234:7058/Videojuego/opciones/{idCaso}";
         UnityWebRequest request = UnityWebRequest.Get(url);
-        request.certificateHandler = new ForceAcceptAll(); // para SSL
+        request.certificateHandler = new ForceAcceptAll(); // Para certificados locales
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -29,8 +37,6 @@ public class OpcionesManager : MonoBehaviour
         }
 
         Opcion[] opcionesTotales = JsonHelper.FromJson<Opcion>(request.downloadHandler.text);
-
-        // Tomar 3 opciones aleatorias
         List<Opcion> opcionesAleatorias = opcionesTotales.OrderBy(x => Random.value).Take(3).ToList();
 
         for (int i = 0; i < botonesOpciones.Length; i++)
@@ -41,11 +47,39 @@ public class OpcionesManager : MonoBehaviour
             textoBtn.text = opcionesAleatorias[i].texto_opcion;
 
             int idOpcion = opcionesAleatorias[i].id_opcion;
+            int botonIndex = i;
+
             btn.onClick.RemoveAllListeners();
             btn.onClick.AddListener(() =>
             {
-                uiManager.RegistrarDecision(idOpcion); // asegúrate de tener este método en UIManager
+                uiManager.RegistrarDecision(idOpcion);
             });
+
+            // Aquí está bien colocada
+            StartCoroutine(CargarImpactosDeAPI(idOpcion, botonIndex));
+        }
+
+    }
+
+    public IEnumerator CargarImpactosDeAPI(int idOpcion, int botonIndex)
+    {
+        string url = $"https://10.22.169.234:7058/Videojuego/opcion/{idOpcion}/indicadores";
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        request.certificateHandler = new ForceAcceptAll();
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Error al obtener impactos: " + request.error);
+            yield break;
+        }
+
+        string json = "{\"impactos\":" + request.downloadHandler.text + "}";
+        ImpactoListWrapper wrapper = JsonUtility.FromJson<ImpactoListWrapper>(json);
+
+        if (impactoViewer != null)
+        {
+            impactoViewer.MostrarImpactos(wrapper.impactos, botonIndex);
         }
     }
 }

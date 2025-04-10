@@ -2397,7 +2397,7 @@ GameObject:
   - component: {fileID: 1892835631}
   - component: {fileID: 1892835634}
   - component: {fileID: 1892835633}
-  - component: {fileID: 1892835632}
+  - component: {fileID: 1892835635}
   m_Layer: 5
   m_Name: Dialogo
   m_TagString: Untagged
@@ -2425,29 +2425,6 @@ RectTransform:
   m_AnchoredPosition: {x: 25, y: -350}
   m_SizeDelta: {x: -250, y: -800}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1892835632
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1892835630}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d224ca4af712f9459bf0a02e12e2400, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  textComponent: {fileID: 1374705441}
-  lines:
-  - "Bienvenido a Asesor\xEDa OXXO."
-  - "Como asesor de tienda, tu trabajo es supervisar y guiar a los l\xEDderes de
-    nuestras tiendas."
-  - "Hoy llegar\xE1n l\xEDderes con problemas. L\xE9elos, decide y mant\xE9n el negocio
-    en marcha."
-  - "Lee cada caso con atenci\xF3n y decide la mejor soluci\xF3n."
-  - "\xBFCrees que puedes con esto?"
-  - "\xA1Demuestra que eres el asesor que esta empresa necesita!"
-  textSpeed: 0.09
 --- !u!114 &1892835633
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2486,6 +2463,28 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1892835630}
   m_CullTransparentMesh: 1
+--- !u!114 &1892835635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1892835630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 720fd2e7d24d2774d97f65740926d40a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textComponent: {fileID: 1374705441}
+  lines:
+  - "Bienvenido a Asesor\xEDa OXXO."
+  - "Como asesor de tienda, tu trabajo es supervisar y guiar a los l\xEDderes de
+    nuestras\_tiendas."
+  - "Hoy llegar\xE1n l\xEDderes con problemas. L\xE9elos, decide y mant\xE9n el negocio\_en\_marcha."
+  - "Lee cada caso con atenci\xF3n y decide la mejor\_soluci\xF3n."
+  - "\xBFCrees que puedes con esto?"
+  - "\xA1Demuestra que eres el asesor que esta empresa\_necesita!"
+  textSpeed: 0.1
 --- !u!1 &2094693137
 GameObject:
   m_ObjectHideFlags: 0

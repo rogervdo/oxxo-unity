@@ -56,7 +56,8 @@ public class ControladorJuegoEspacial : MonoBehaviour
 
     private void Start()
     {
-        
+        APIManagerEspacial.Instance.IniciarJuegoEspacial();
+
     }
 
     private void Update()
@@ -87,6 +88,8 @@ public class ControladorJuegoEspacial : MonoBehaviour
             break;
     }
 }
+
+
 
 
 

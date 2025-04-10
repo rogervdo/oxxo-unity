@@ -520,6 +520,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &142359118
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 142359120}
+  - component: {fileID: 142359119}
+  m_Layer: 0
+  m_Name: ApiManagerEspacial
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &142359119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142359118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31e1ee4b3c8d84689b99809fe2af9a8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  apiBaseUrl: https://10.22.197.131:7058
+  preguntasEspaciales: []
+--- !u!4 &142359120
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142359118}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 703.54034, y: 470.00983, z: -4.3583884}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &153813590
 GameObject:
   m_ObjectHideFlags: 0
@@ -913,6 +959,10 @@ MonoBehaviour:
   timePanel: {fileID: 153813590}
   signoPregunta: {fileID: 183434073}
   numeroSigno: 3
+  botonesOpciones:
+  - {fileID: 1865887897}
+  - {fileID: 1292476061}
+  - {fileID: 395752017}
 --- !u!58 &183434078
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -1233,6 +1283,10 @@ MonoBehaviour:
   timePanel: {fileID: 153813590}
   signoPregunta: {fileID: 218279693}
   numeroSigno: 1
+  botonesOpciones:
+  - {fileID: 1865887897}
+  - {fileID: 1292476061}
+  - {fileID: 395752017}
 --- !u!58 &218279698
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -1924,7 +1978,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &522912007
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2077,11 +2131,11 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 88472beecc7eb094ea3f8ceb32134b90, type: 3}
-    m_FontSize: 26
+    m_FontSize: 39
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 0
-    m_MaxSize: 40
+    m_MaxSize: 50
     m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -3471,6 +3525,37 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 6.08354, y: 2.2022855}
   m_EdgeRadius: 0
+--- !u!1 &1116925498
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1116925499}
+  m_Layer: 0
+  m_Name: UIControlleEspacio
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1116925499
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116925498}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 736.39154, y: 395.61484, z: -1.8088523}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1122114884
 GameObject:
   m_ObjectHideFlags: 0
@@ -3934,10 +4019,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 2
     m_MaxSize: 40
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -4134,10 +4219,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 2
     m_MaxSize: 40
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -4574,6 +4659,10 @@ MonoBehaviour:
   timePanel: {fileID: 153813590}
   signoPregunta: {fileID: 1410301567}
   numeroSigno: 2
+  botonesOpciones:
+  - {fileID: 1865887897}
+  - {fileID: 1292476061}
+  - {fileID: 395752017}
 --- !u!58 &1410301572
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -5114,7 +5203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 295bd7d7e20ff49b28854e437ed925cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tiempoMaximo: 5
+  tiempoMaximo: 15
   slider: {fileID: 153813594}
   vidasUI: {fileID: 1376851449}
   signoActivo: 1
@@ -6452,10 +6541,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 2
     m_MaxSize: 40
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -6485,3 +6574,5 @@ SceneRoots:
   - {fileID: 1585730180}
   - {fileID: 1376851450}
   - {fileID: 383312739}
+  - {fileID: 142359120}
+  - {fileID: 1116925499}

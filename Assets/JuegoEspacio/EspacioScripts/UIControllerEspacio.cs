@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Networking;
 
 public class UIControllerEspacio : MonoBehaviour
 {
@@ -57,4 +58,41 @@ public class UIControllerEspacio : MonoBehaviour
     {
         
     }
+
+    public void RegistrarDecision(int idOpcion)
+{
+    StartCoroutine(EnviarDecisionAPI(idOpcion));
+}
+
+private IEnumerator EnviarDecisionAPI(int idOpcion)
+{
+    int idInstancia = PlayerPrefs.GetInt("id_instancia", 0); // o como lo manejes
+
+    if (idInstancia == 0)
+    {
+        Debug.LogWarning("No hay id_instancia guardado en PlayerPrefs.");
+        yield break;
+    }
+
+    string url = "https://10.22.169.234:7058/videojuego/respuesta";
+
+    WWWForm form = new WWWForm();
+    form.AddField("id_instancia", idInstancia);
+    form.AddField("id_opcion", idOpcion);
+
+    UnityWebRequest request = UnityWebRequest.Post(url, form);
+    request.certificateHandler = new ForceAcceptAll(); // si usas HTTPS con certificado local
+
+    yield return request.SendWebRequest();
+
+    if (request.result == UnityWebRequest.Result.Success)
+    {
+        Debug.Log("Respuesta enviada correctamente.");
+    }
+    else
+    {
+        Debug.LogError("Error al enviar la respuesta: " + request.error);
+    }
+}
+
 }

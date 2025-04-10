@@ -62,6 +62,7 @@ public class SceneController : MonoBehaviour
 
     public void Regresar_M()
     {
+        Time.timeScale = 1f;
         SceneManager.LoadScene("Menu_Main");
     }
 

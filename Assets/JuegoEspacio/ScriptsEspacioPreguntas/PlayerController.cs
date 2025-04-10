@@ -1,81 +1,42 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed;
-    public Rigidbody2D rig;
+    [SerializeField]public float moveSpeed;
+    public Rigidbody2D playerRb;
     public SpriteRenderer sr;
-    private Animator animatorController;
+    private Vector2 moveInput;
+    private Animator playerAnimator;
 
     void Start()
     {
-        animatorController = GetComponent<Animator>();
+       playerRb = GetComponent<Rigidbody2D>();
+       playerAnimator = GetComponent<Animator>();
     }
 
     void Update()
-     {
-        Vector2 movement = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-        rig.linearVelocity = movement * moveSpeed;
+    {
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveY = Input.GetAxisRaw("Vertical");
+        moveInput = new Vector2(moveX, moveY).normalized;
 
-        if (movement != Vector2.zero)
-        {
-            // Detectar dirección
-            if (Mathf.Abs(movement.x) > Mathf.Abs(movement.y))
-            {
-                UpdateAnimation(PlayerAnimation.Lateral);
+        playerAnimator.SetFloat("Horizontal",moveX);
+        playerAnimator.SetFloat("Vertical", moveY);
+        playerAnimator.SetFloat("Speed", moveInput.sqrMagnitude);
 
-                // Flip horizontal
-                if (movement.x < 0) sr.flipX = true;
-                else if (movement.x > 0) sr.flipX = false;
-            }
-            else if (movement.y > 0)
-            {
-                UpdateAnimation(PlayerAnimation.Delante); // Movimiento hacia arriba
-            }
-            else if (movement.y < 0)
-            {
-                UpdateAnimation(PlayerAnimation.Atras); // Movimiento hacia abajo
-            }
-        }
-        else
-        {
-            UpdateAnimation(PlayerAnimation.Idle); // Sin movimiento
-        }
     }
 
-    public enum PlayerAnimation
+    private void FixedUpdate()
     {
-        Idle, Delante, Atras, Lateral
+        playerRb.MovePosition(playerRb.position + moveInput * moveSpeed * Time.fixedDeltaTime);
     }
 
-    void UpdateAnimation(PlayerAnimation animation)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        switch (animation)
+        if (other.CompareTag("BloqueCambio"))  // Asegúrate de que el bloque tenga este tag
         {
-            case PlayerAnimation.Idle:
-                animatorController.SetBool("Idle", true);
-                animatorController.SetBool("Forward", false);
-                animatorController.SetBool("Back", false);
-                animatorController.SetBool("Lateral", false);
-                break;
-            case PlayerAnimation.Delante:
-                animatorController.SetBool("Forward", true);
-                animatorController.SetBool("Idle", false);
-                animatorController.SetBool("Back", false);
-                animatorController.SetBool("Lateral", false);
-                break;
-            case PlayerAnimation.Atras:
-                animatorController.SetBool("Back", true);
-                animatorController.SetBool("Idle", false);
-                animatorController.SetBool("Forward", false);
-                animatorController.SetBool("Lateral", false);
-                break;
-            case PlayerAnimation.Lateral:
-                animatorController.SetBool("Lateral", true);
-                animatorController.SetBool("Idle", false);
-                animatorController.SetBool("Back", false);
-                animatorController.SetBool("Forward", false);
-                break;
+            SceneManager.LoadScene("EngineRoom_Q");
         }
     }
 }

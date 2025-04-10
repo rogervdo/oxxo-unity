@@ -1,204 +1,272 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Text; // For StringBuilder
+using UnityEngine.SceneManagement;
+using System.Collections;
 
+// Asegura que el GameObject tenga al menos un AudioSource (para el screamer principalmente).
+// El script añadirá un segundo AudioSource para el latido.
+[RequireComponent(typeof(AudioSource))]
 public class HealthController : MonoBehaviour
 {
-    [Header("Settings")]
-    [Tooltip("The UI Image component used for the health bar fill.")]
+    // --- Variables de Configuración (Asignar en Inspector) ---
+
+    [Header("UI y Referencias")]
+    [Tooltip("La imagen UI que actúa como barra de vida.")]
     public Image healthBarFill;
-    [Tooltip("Maximum health value.")]
+    [Tooltip("El GameObject con la imagen del screamer (debe estar desactivado inicialmente).")]
+    public GameObject screamerImageObject;
+    [Tooltip("Referencia al script AnomalySpawner para obtener el conteo.")]
+    public AnomalySpawner anomalySpawner;
+    [Tooltip("El componente Text (o TextMeshProUGUI) para mostrar el puntaje.")]
+    public Text scoreText; // O: public TMPro.TextMeshProUGUI scoreText;
+
+    [Header("Vida y Descenso")]
+    [Tooltip("Vida máxima inicial.")]
     public float maxHealth = 100f;
-    [Tooltip("Rate at which health decreases per second.")]
-    public float decreaseRate = 3f;
+    [Tooltip("Vida perdida por segundo por CADA anomalía activa.")]
+    public float drainPerAnomaly = 0.75f;
+    [Tooltip("Opcional: Descenso base constante de vida por segundo (poner a 0 si no se desea).")]
+    public float baseDecreaseRate = 0f;
 
-    [Header("State (Read Only)")]
-    [SerializeField] // Show private variable in Inspector (read-only)
-    private float currentHealth = 100f;
-    [SerializeField]
-    private bool andatti = false;
+    [Header("Sonido")]
+    [Tooltip("Sonido que se reproduce al morir (screamer).")]
+    public AudioClip screamerSoundClip;
+    [Tooltip("Sonido de latido del corazón.")]
+    public AudioClip heartbeatSoundClip;
+    [Tooltip("Porcentaje de vida (0.0 a 1.0) por debajo del cual empieza el latido.")]
+    [Range(0f, 1f)]
+    public float heartbeatStartThreshold = 0.3f; // 30%
+    [Tooltip("Velocidad (pitch) mínima del latido.")]
+    public float minHeartbeatPitch = 0.8f;
+    [Tooltip("Velocidad (pitch) máxima del latido (cuando la vida está cerca de 0).")]
+    public float maxHeartbeatPitch = 2.0f;
 
-    // Flag to track if health changed this frame, triggering LateUpdate UI refresh
-    private bool healthChangedThisFrame = false;
-    private StringBuilder debugLogBuilder = new StringBuilder(); // To reduce log spam
+    [Header("Puntaje")]
+    [Tooltip("Puntos ganados por cada segundo de supervivencia.")]
+    public float pointsPerSecond = 10f;
+
+    // --- Variables Internas ---
+    private float currentHealth;                  // Vida actual
+    private bool andatti = false;                 // Efecto Andatti activo?
+    private bool healthChangedThisFrame = false;  // ¿Cambió vida este frame?
+    private bool isGameOver = false;              // ¿Terminó el juego?
+    private AudioSource audioSource;              // Para sonidos 'one-shot' (screamer)
+    private AudioSource heartbeatAudioSource;     // Para el loop del latido
+    private float currentScore = 0f;              // Puntaje actual
+
+    // --- Métodos de Unity ---
 
     void Start()
     {
-        debugLogBuilder.AppendLine($"--- HealthController Start Frame {Time.frameCount} ---");
+        // Configuración inicial del AudioSource principal (requerido por [RequireComponent])
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource != null) {
+            audioSource.playOnAwake = false; // No queremos que suene nada al inicio
+        } else {
+             // Esto no debería pasar debido a RequireComponent, pero por si acaso
+             Debug.LogError("¡Falta el componente AudioSource principal!", this);
+        }
+
+        // Configuración del AudioSource secundario para el latido
+        SetupHeartbeatAudioSource();
+
+        // Inicialización del estado del juego
         currentHealth = maxHealth;
+        currentScore = 0f;
         andatti = false;
-        debugLogBuilder.AppendLine($"Start: Initializing currentHealth={currentHealth}, maxHealth={maxHealth}");
-        // Ensure the image reference is valid before updating
-        if (healthBarFill != null)
-        {
-            UpdateHealthBar(); // Initial visual setup only if reference is valid
-        }
-        else
-        {
-            Debug.LogError("HealthController Start: healthBarFill is NOT assigned in the Inspector!", this);
-        }
-        healthChangedThisFrame = false; // Start with no change flagged
-        Debug.Log(debugLogBuilder.ToString()); // Print accumulated start log
-        debugLogBuilder.Clear();
+        isGameOver = false;
+
+        // Comprobación y configuración inicial de UI y otros elementos
+        CheckReferences();
+        if (screamerImageObject != null) screamerImageObject.SetActive(false);
+        UpdateHealthBar();
+        UpdateScoreDisplay();
     }
 
     void Update()
     {
-        debugLogBuilder.Clear(); // Clear at start of Update for this frame's log
-        debugLogBuilder.AppendLine($"--- HealthController Update Frame {Time.frameCount} (Time={Time.time:F3}, Delta={Time.deltaTime:F4}) ---");
-        debugLogBuilder.AppendLine($"Update Start: currentHealth={currentHealth:F3}, andatti={andatti}, healthChangedThisFrame={healthChangedThisFrame}");
+        // No ejecutar lógica de juego si ya terminó
+        if (isGameOver) return;
 
-        // --- Health Decrease Logic ---
-        if (!andatti)
-        {
-            float previousHealth = currentHealth;
-            float decreaseAmount = decreaseRate * Time.deltaTime;
-            // Only decrease if currentHealth is above 0
-            if (currentHealth > 0)
-            {
-                currentHealth -= decreaseAmount;
-                currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Clamp *after* decrease
+        // Actualiza el puntaje basado en el tiempo
+        UpdateScore();
 
-                // Check if health actually changed
-                if (currentHealth != previousHealth)
-                {
-                    debugLogBuilder.AppendLine($"Update Decrease: Decreased by {decreaseAmount:F4}. Health {previousHealth:F3} -> {currentHealth:F3}. Flagging change.");
-                    healthChangedThisFrame = true;
-                }
-                else if (previousHealth == 0 && currentHealth == 0) {
-                     // Optional: Log only if it was already 0 and tried to decrease
-                     // debugLogBuilder.AppendLine($"Update Decrease: Skipped decrease amount {decreaseAmount:F4}, health already at 0.");
-                }
-                 else {
-                    // This case might happen if decreaseAmount is extremely small due to low deltaTime
-                    debugLogBuilder.AppendLine($"Update Decrease: Decrease calculated ({decreaseAmount:F4}), but health value didn't change after clamp. Health={currentHealth:F3}");
-                }
-            }
-            else {
-                 // Already at 0, no need to decrease further
-                 // debugLogBuilder.AppendLine($"Update Decrease: Skipped, health already at 0.");
-            }
-        } else {
-             debugLogBuilder.AppendLine($"Update Decrease: Skipped (andatti={andatti})");
-        }
+        // Actualiza la vida basado en anomalías y tiempo
+        UpdateHealthDrain();
 
-        // --- Spacebar Test (for debugging) ---
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-           debugLogBuilder.AppendLine($"Update: Spacebar pressed!");
-           // Temporarily make spacebar heal HUGE amount
-           AddHealth(50f); // Use a large value like 50 for testing
-        }
+        // Actualiza el sonido del latido basado en la vida actual
+        UpdateHeartbeatSound();
 
-        // DO NOT print log here, wait until LateUpdate finishes for the frame
+        // (Prueba opcional con barra espaciadora)
+        if (Input.GetKeyDown(KeyCode.Space)) { AddHealth(10f); }
     }
 
-    // --- LateUpdate for UI Synchronization ---
-    // Runs after all Update functions are complete for the frame.
+    // Actualizaciones visuales (UI) se hacen en LateUpdate
     void LateUpdate()
     {
-        // Append LateUpdate start info to the log built during Update
-        debugLogBuilder.AppendLine($"--- HealthController LateUpdate Frame {Time.frameCount} ---");
-        debugLogBuilder.AppendLine($"LateUpdate Start: healthChangedThisFrame={healthChangedThisFrame}, currentHealth={currentHealth:F3}");
+        if (isGameOver) return;
+
+        // Si la vida cambió este fotograma, actualiza la barra
         if (healthChangedThisFrame)
         {
-            debugLogBuilder.AppendLine($"LateUpdate: Change detected, calling UpdateHealthBar.");
-            UpdateHealthBar(); // This will append its own log messages
-            healthChangedThisFrame = false; // Reset flag *after* potentially updating
-        } else {
-             debugLogBuilder.AppendLine($"LateUpdate: No change detected, skipping UI update.");
-        }
+            UpdateHealthBar();
+            healthChangedThisFrame = false; // Resetea la bandera
 
-        // Print accumulated log for this entire frame (Update + LateUpdate) and clear
-        Debug.Log(debugLogBuilder.ToString());
-        // Ensure it's clear for the *next* frame's Update
-        // debugLogBuilder.Clear(); // Clearing here might be too early if other LateUpdates log? Let's clear at start of Update instead.
+            // Comprueba si el jugador murió después de la actualización
+            if (currentHealth <= 0f)
+            {
+                TriggerGameOverSequence();
+            }
+        }
     }
 
-    /// <summary>
-    /// Adds a specific amount to the current health/time.
-    /// Clamps the value and flags that a change occurred for LateUpdate.
-    /// Called externally (e.g., by ClickEffectSpawner).
-    /// </summary>
-    public void AddHealth(float amountToAdd)
-    {
-        // Log happens *within* Update or wherever AddHealth is called
-        // Append to the current frame's log string
-        debugLogBuilder.AppendLine($"AddHealth({amountToAdd:F1}) called. Current health before add = {currentHealth:F3}");
-        if (amountToAdd <= 0) {
-             debugLogBuilder.AppendLine($"AddHealth: Amount was <= 0, aborting.");
-             return;
-        }
+    // --- Lógica Principal ---
 
-        float previousHealth = currentHealth;
-        // Only add health if not already at max
-        if (currentHealth < maxHealth)
+    // Configura el segundo AudioSource para el latido
+    void SetupHeartbeatAudioSource() {
+         heartbeatAudioSource = gameObject.AddComponent<AudioSource>(); // Añade un nuevo AudioSource
+         if (heartbeatSoundClip != null) {
+             heartbeatAudioSource.clip = heartbeatSoundClip;
+             heartbeatAudioSource.loop = true;
+             heartbeatAudioSource.playOnAwake = false;
+             heartbeatAudioSource.volume = 1f; // Ajusta si es necesario
+             heartbeatAudioSource.pitch = minHeartbeatPitch;
+             // heartbeatAudioSource.spatialBlend = 0f; // Sonido 2D
+         } else {
+             Debug.LogWarning("No se asignó 'heartbeatSoundClip'. El sonido de latido no funcionará.", this);
+             heartbeatAudioSource.enabled = false; // Desactiva si no hay clip
+         }
+    }
+
+    // Comprueba si las referencias clave están asignadas en el Inspector
+    void CheckReferences() {
+        if (anomalySpawner == null) Debug.LogError("¡Referencia 'anomalySpawner' no asignada!", this);
+        if (scoreText == null) Debug.LogWarning("Referencia 'scoreText' no asignada.", this);
+        if (screamerImageObject == null) Debug.LogWarning("Referencia 'screamerImageObject' no asignada.", this);
+        if (screamerSoundClip == null) Debug.LogWarning("Referencia 'screamerSoundClip' no asignada.", this);
+        if (healthBarFill == null) Debug.LogError("¡Referencia 'healthBarFill' no asignada!", this);
+    }
+
+    // Calcula y aplica el descenso de vida
+    void UpdateHealthDrain() {
+        if (!andatti) // Solo si no está activo el efecto Andatti
         {
-            currentHealth += amountToAdd;
-            currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Clamp after adding
+            float previousHealth = currentHealth;
+            int activeAnomalyCount = (anomalySpawner != null) ? anomalySpawner.ActiveAnomalyCount : 0;
+            float totalDecrease = baseDecreaseRate + (activeAnomalyCount * drainPerAnomaly);
 
-             // Check if the health value actually changed after clamping
-            if (currentHealth != previousHealth)
+            if (totalDecrease > 0 && currentHealth > 0) // Aplica solo si hay descenso y vida > 0
             {
-                debugLogBuilder.AppendLine($"AddHealth: Health changed {previousHealth:F3} -> {currentHealth:F3}. Flagging change.");
-                healthChangedThisFrame = true; // Flag that a change happened
+                currentHealth -= totalDecrease * Time.deltaTime;
+                currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Limita a 0-max
+
+                if (currentHealth != previousHealth) {
+                    healthChangedThisFrame = true; // Marca para actualizar UI
+                }
             }
-            else
-            {
-                // This could happen if amountToAdd is very small or due to float precision near max
-                debugLogBuilder.AppendLine($"AddHealth: Health value unchanged after adding & clamping. Previous={previousHealth:F3}, Current={currentHealth:F3}");
-            }
-        } else {
-             debugLogBuilder.AppendLine($"AddHealth: Skipped adding health, already at max ({currentHealth:F3}).");
         }
     }
 
-    /// <summary>
-    /// Updates the fill amount of the health bar Image component.
-    /// Called by Start and LateUpdate. Appends logs to the frame's StringBuilder.
-    /// </summary>
-    private void UpdateHealthBar()
-    {
-        // Log happens *within* LateUpdate context usually
-        debugLogBuilder.Append($"UpdateHealthBar: "); // Append to existing log for the frame
-        if (healthBarFill == null) {
-             debugLogBuilder.AppendLine($"FAILED - healthBarFill is NULL!");
-             // Optional: Try to find it dynamically as a last resort? Not recommended for performance.
-             // healthBarFill = GetComponentInChildren<Image>(); // Example, adjust if needed
-             // if(healthBarFill == null) return; // Still couldn't find it
-             return; // Critical error, stop processing
-        }
-        if (maxHealth <= 0) {
-            debugLogBuilder.AppendLine($"FAILED - maxHealth <= 0 ({maxHealth:F1})!");
-            healthBarFill.fillAmount = 0f;
+    // Incrementa el puntaje con el tiempo
+    void UpdateScore() {
+        currentScore += pointsPerSecond * Time.deltaTime;
+        UpdateScoreDisplay(); // Actualiza la UI del puntaje
+    }
+
+    // Controla el sonido del latido (inicio, parada, pitch)
+    void UpdateHeartbeatSound() {
+        if (heartbeatAudioSource == null || !heartbeatAudioSource.enabled || isGameOver) {
+            // Detiene si ya no es válido o terminó el juego
+            if (heartbeatAudioSource != null && heartbeatAudioSource.isPlaying) heartbeatAudioSource.Stop();
             return;
         }
 
-        // Calculate fill amount (0.0 to 1.0) and set it
-        float fillValue = Mathf.Clamp01(currentHealth / maxHealth);
-        debugLogBuilder.AppendLine($"Setting fillAmount to {fillValue:F3} (current={currentHealth:F3}, max={maxHealth:F1}) on Image '{healthBarFill.gameObject.name}'");
+        float healthRatio = (maxHealth > 0) ? (currentHealth / maxHealth) : 0f;
 
-        // Check if the value is actually different before assigning, minor optimization
-        if (healthBarFill.fillAmount != fillValue) {
-             healthBarFill.fillAmount = fillValue;
-        } else {
-             // Optional: Log if the value didn't need changing
-             // debugLogBuilder.Append(" (Value unchanged, skipping assignment)");
+        if (healthRatio <= heartbeatStartThreshold && currentHealth > 0) { // Por debajo del umbral y vivo
+            float progress = 1f - Mathf.Clamp01(healthRatio / heartbeatStartThreshold);
+            heartbeatAudioSource.pitch = Mathf.Lerp(minHeartbeatPitch, maxHeartbeatPitch, progress);
+            if (!heartbeatAudioSource.isPlaying) heartbeatAudioSource.Play(); // Inicia si no sonaba
+        } else { // Por encima del umbral o muerto
+            if (heartbeatAudioSource.isPlaying) heartbeatAudioSource.Stop(); // Detiene si sonaba
         }
     }
 
+    // --- Métodos Públicos ---
 
-    // --- Andatti Logic (unchanged, but added frame count to logs) ---
+    // Añade vida (llamado externamente)
+    public void AddHealth(float amountToAdd) {
+        if (isGameOver || amountToAdd <= 0) return; // No hacer nada si terminó o no es positivo
+        float previousHealth = currentHealth;
+        if (currentHealth < maxHealth) {
+            currentHealth += amountToAdd;
+            currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+            if (currentHealth != previousHealth) {
+                healthChangedThisFrame = true; // Marca para actualizar UI
+            }
+        }
+    }
+
+    // Activa el efecto Andatti (pausa descenso de vida)
     public void ConsumeAndatti() {
-        if (!andatti) {
-             andatti = true;
-             Debug.Log($"ConsumeAndatti called at Frame {Time.frameCount}. Pausing health decrease."); // Use Debug.Log directly for events
-             Invoke(nameof(ResetAndatti), 5f);
+        if (isGameOver || !andatti) {
+             if(!isGameOver) andatti = true;
+             if(andatti) Invoke(nameof(ResetAndatti), 5f); // Desactivar después de 5 seg
         }
     }
+
+    // --- Actualizaciones de UI ---
+
+    // Actualiza la barra de vida visual
+    private void UpdateHealthBar() {
+        if (healthBarFill != null && maxHealth > 0) {
+            healthBarFill.fillAmount = Mathf.Clamp01(currentHealth / maxHealth);
+        }
+    }
+
+    // Actualiza el texto del puntaje
+    private void UpdateScoreDisplay() {
+        if (scoreText != null) {
+            scoreText.text = "Puntos: " + Mathf.FloorToInt(currentScore).ToString();
+        }
+    }
+
+    // --- Secuencia de Game Over ---
+
+    // Inicia el fin del juego
+    private void TriggerGameOverSequence() {
+        if (isGameOver) return; // Ejecutar solo una vez
+        isGameOver = true;
+
+        // Guardar puntaje final
+        PlayerPrefs.SetInt("LastScore", Mathf.FloorToInt(currentScore));
+        PlayerPrefs.Save();
+        Debug.Log($"Puntaje final guardado: {PlayerPrefs.GetInt("LastScore")}");
+
+        // Activar efectos visuales y sonoros
+        if (screamerImageObject != null) screamerImageObject.SetActive(true);
+        if (audioSource != null && screamerSoundClip != null) audioSource.PlayOneShot(screamerSoundClip);
+        if (heartbeatAudioSource != null && heartbeatAudioSource.isPlaying) heartbeatAudioSource.Stop(); // Detiene latido
+
+        // Pausa el juego
+        Time.timeScale = 0f;
+
+        // Inicia coroutine para cargar escena de Game Over
+        StartCoroutine(LoadGameOverAfterDelay(3.0f));
+    }
+
+    // Coroutine para esperar tiempo real y cargar escena
+    private IEnumerator LoadGameOverAfterDelay(float delay) {
+        // Debug.Log($"Esperando {delay} segundos (tiempo real)...");
+        yield return new WaitForSecondsRealtime(delay); // Espera ignorando Time.timeScale
+
+        // Debug.Log("Restaurando TimeScale y cargando HR_GameOver...");
+        Time.timeScale = 1f; // ¡¡Restaurar TimeScale ANTES de cargar!!
+        SceneManager.LoadScene("HR_GameOver"); // Carga la escena
+    }
+
+    // Desactiva el efecto Andatti (llamado por Invoke)
     private void ResetAndatti() {
         andatti = false;
-         Debug.Log($"ResetAndatti called at Frame {Time.frameCount}. Resuming health decrease."); // Use Debug.Log directly for events
     }
-    // --- End Andatti Logic ---
 }

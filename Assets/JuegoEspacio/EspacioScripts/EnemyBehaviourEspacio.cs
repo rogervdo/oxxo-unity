@@ -14,7 +14,7 @@ public class EnemyBehaviourEspacio : MonoBehaviour
         this.transform.position += Vector3.right * Time.deltaTime * velocity;
 
         // Si el enemigo sale del límite, se destruye
-        if(transform.position.x >= 50)
+        if(transform.position.x <= -50)
         {
             GameObject.Destroy(this.gameObject);
         }

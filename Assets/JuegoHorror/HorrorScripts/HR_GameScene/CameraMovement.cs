@@ -4,10 +4,10 @@ public class CameraMovement : MonoBehaviour
 {
     public float movimiento = 0f;
     public float margenMovimiento = 4f;
-    public float margenMouse = 2.5f;
-    public float velocidadMovimiento = 1f;
+    public float margenMouse = 2f;
+    public float velocidadMovimiento = 4f;
 
-    public float limiteMouse = 5f;
+    public float limiteMouse = 4f;
 
     public Vector2 mousePosition;
 

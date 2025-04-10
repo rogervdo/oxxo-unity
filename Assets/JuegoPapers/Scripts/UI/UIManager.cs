@@ -31,6 +31,7 @@ public class UIManager : MonoBehaviour
     private List<Caso> listaCasos = new List<Caso>(); 
     public CasoViewer casoViewer;
     public OpcionesManager opcionesManager;
+    public IndicadoresManager indicadoresManager;
 
 
     private void Start()
@@ -180,6 +181,9 @@ public class UIManager : MonoBehaviour
 
         InstanciaRespuesta data = JsonUtility.FromJson<InstanciaRespuesta>(request.downloadHandler.text);
         idInstancia = data.id_instancia;
+
+            indicadoresManager.idInstancia = idInstancia;
+        indicadoresManager.MostrarIndicadores();
 
         // 2. Obtener todos los casos
         UnityWebRequest requestCasos = UnityWebRequest.Get("https://10.22.169.234:7058/Videojuego");

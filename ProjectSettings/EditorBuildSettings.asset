@@ -60,14 +60,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Espacio/SCENES/SpaceshipGame/Escena_Ganar_S.unity
     guid: 5761ee144f26b0448bc8addec5277a35
   - enabled: 1
-    path: Assets/Scenes/Juego3/EndScenes/AlternEnd.unity
-    guid: aaaf13aa3305c04409d35eead6f33ec9
-  - enabled: 1
-    path: Assets/Scenes/Juego3/EndScenes/LoseScenePP.unity
-    guid: 9351dc1152db219418f7b02f2e643844
-  - enabled: 1
-    path: Assets/Scenes/Juego3/EndScenes/WinScenePP.unity
-    guid: 22ea3e144c36b0548a87fef8ab4c8e8f
+
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

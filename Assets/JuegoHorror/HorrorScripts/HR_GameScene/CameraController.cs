@@ -1,135 +1,127 @@
 using UnityEngine;
-using System.Collections.Generic; // Necesario para List
+using System.Collections.Generic; 
 
 public class CameraController : MonoBehaviour
 {
-    public Camera mainCamera; // Asigna la cámara en el Inspector
+    // Referencia al objeto de la cámara principal.
+    public Camera mainCamera;
+    // Referencia al ViewManager.
     private ViewManager viewManager;
-    private int currentIndex = 0; // Usado por moveCamera (cíclico)
-    private List<int> viewIDs; // Lista de IDs de vistas disponibles
+    // Índice actual en la lista viewIDs para el ciclo.
+    private int currentIndex = 0;
+    // Lista de IDs de vista disponibles proporcionada por ViewManager.
+    private List<int> viewIDs;
 
-    // Se llama DESPUÉS de que ViewManager haya encontrado las vistas.
+    // Método de inicialización llamado por ViewManager después de que esté listo.
     public void cameraControllerStartup()
     {
         viewManager = FindFirstObjectByType<ViewManager>();
         if (viewManager == null) {
-             Debug.LogError("CameraController no pudo encontrar ViewManager!", this);
+
              return;
         }
+        // Obtiene la lista de IDs de vista del manager.
         viewIDs = viewManager.GetViewIDs();
         if (viewIDs == null || viewIDs.Count == 0) {
-            Debug.LogWarning("CameraController no recibió IDs de vista desde ViewManager.", this);
-        } else {
-             // Opcional: Ordenar los IDs si quieres que Tecla 1 siempre vaya al ID más bajo, etc.
-             // viewIDs.Sort();
-             Debug.Log($"CameraController inicializado con {viewIDs.Count} IDs de vista.");
-        }
+
+        } 
     }
 
-    // NUEVO: Se llama cada fotograma para comprobar input del teclado.
+
     void Update()
     {
-        // No hacer nada si aún no tenemos los IDs de las vistas.
+        // No hacer nada si los IDs de vista aún no se han cargado.
         if (viewIDs == null || viewIDs.Count == 0)
         {
             return;
         }
 
-        // Comprobar tecla 1 (mapeada al índice 0 de la lista viewIDs)
+        // Comprueba las teclas numéricas del 1 al 5.
         if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
         {
-            TryMoveToViewAtIndex(0); // Intenta ir a la vista en el índice 0
+            TryMoveToViewAtIndex(0); // Intenta mover a la vista en el índice 0 de la lista.
         }
-        // Comprobar tecla 2 (mapeada al índice 1 de la lista viewIDs)
         else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
         {
-            TryMoveToViewAtIndex(1); // Intenta ir a la vista en el índice 1
+            TryMoveToViewAtIndex(1); // Intenta mover a la vista en el índice 1 de la lista.
         }
-        // Comprobar tecla 3 (mapeada al índice 2 de la lista viewIDs)
         else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
         {
-            TryMoveToViewAtIndex(2); // Intenta ir a la vista en el índice 2
+            TryMoveToViewAtIndex(2); // Intenta mover a la vista en el índice 2 de la lista.
         }
-        // Comprobar tecla 4 (mapeada al índice 3 de la lista viewIDs)
         else if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4))
         {
-            TryMoveToViewAtIndex(3); // Intenta ir a la vista en el índice 3
+            TryMoveToViewAtIndex(3); // Intenta mover a la vista en el índice 3 de la lista.
         }
-        // Comprobar tecla 5 (mapeada al índice 4 de la lista viewIDs)
         else if (Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5))
         {
-            TryMoveToViewAtIndex(4); // Intenta ir a la vista en el índice 4
+            TryMoveToViewAtIndex(4); // Intenta mover a la vista en el índice 4 de la lista.
         }
-        // Puedes añadir más 'else if' si necesitas soportar más teclas (6, 7, etc.)
     }
 
-    // NUEVO: Método auxiliar para mover la cámara a la vista correspondiente
-    // al índice dado en la lista 'viewIDs'.
+    // Método auxiliar para mover la cámara a la vista correspondiente a un índice de la lista.
     private void TryMoveToViewAtIndex(int index)
     {
-        // Comprueba si el índice solicitado existe dentro de los límites de la lista.
+        // Comprueba si el índice solicitado es válido dentro de los límites de la lista.
         if (index >= 0 && index < viewIDs.Count)
         {
-            // Obtiene el ID real de la vista guardado en ese índice.
+            // Obtiene el ID de vista real almacenado en ese índice.
             int targetViewID = viewIDs[index];
-            // Llama a la función que ya tenías para mover la cámara.
+            // Llama a la función existente para mover la cámara usando el ID.
             MoveCameraToView(targetViewID);
-        }
-        else
-        {
-            // Aviso si se pulsa una tecla para la que no hay vista configurada.
-             Debug.LogWarning($"Se presionó la tecla {index + 1}, pero no hay una vista configurada para el índice {index} en la lista viewIDs.");
         }
     }
 
-    // Mueve la cámara cíclicamente (función original)
+    // Mueve la cámara cíclicamente a la siguiente vista en la lista.
     public void moveCamera()
     {
-        // No hacer nada si no hay IDs
+        // No hacer nada si no hay IDs de vista disponibles.
         if (viewIDs == null || viewIDs.Count == 0) {
-            Debug.LogWarning("moveCamera llamado pero no hay viewIDs disponibles.", this);
+
             return;
         }
 
+        // Calcula el siguiente índice, volviendo al principio usando módulo.
         currentIndex = (currentIndex + 1) % viewIDs.Count;
         int nextID = viewIDs[currentIndex];
 
-        // Usar la función existente para asegurar consistencia
+        // Usa la función de movimiento específico por consistencia.
         MoveCameraToView(nextID);
-        Debug.Log("Cámara ciclada a ID " + nextID); // Log más específico
+
     }
 
-    // Mueve la cámara a un ID específico (función original, ahora llamada por Update y moveCamera)
+    // Mueve la cámara directamente a la posición asociada con un ID de vista específico.
     public void MoveCameraToView(int viewID)
     {
-        // Asegurarse de que ViewManager y la cámara están listos
+        // Asegura que ViewManager y la referencia a la cámara sean válidos.
         if (viewManager == null || mainCamera == null) {
-             Debug.LogError("MoveCameraToView: ViewManager o MainCamera no están listos/asignados.", this);
+             // Debug.LogError("MoveCameraToView: ViewManager o MainCamera no están listos/asignados.", this); // ELIMINADO
              return;
         }
-        // No es necesario comprobar viewIDs.Contains aquí, GetViewPosition ya lo hace
 
+        // Obtiene la posición objetivo desde ViewManager usando el ID.
         Vector3 newPos = viewManager.GetViewPosition(viewID);
 
-        // Comprueba si GetViewPosition devolvió la posición por defecto (error)
-        // (Asumiendo que Vector3.zero es la señal de error de GetViewPosition)
-        // O mejor, podrías modificar GetViewPosition para devolver un booleano o lanzar una excepción.
-        if (newPos == Vector3.zero && !viewManager.GetViewIDs().Contains(viewID)) { // Comprueba si realmente es porque no existe
-             Debug.LogWarning("MoveCameraToView: No se pudo obtener una posición válida para View ID " + viewID);
-             return; // No mover si la posición es inválida
+        // Comprueba si ViewManager devolvió una posición inválida (p.ej., Vector3.zero si no se encontró el ID).
+        if (newPos == Vector3.zero && !viewManager.GetViewIDs().Contains(viewID)) {
+
+             return; 
+        }
+
+        // Aplica la nueva posición, manteniendo Z constante.
+        // Usa la X e Y de la posición de la vista.
+        mainCamera.transform.position = new Vector3(newPos.x, newPos.y, -10f);
+
+
+        int foundIndex = viewIDs.IndexOf(viewID);
+        if(foundIndex != -1) {
+            currentIndex = foundIndex;
+        } else {
+
+             currentIndex = 0;
+
         }
 
 
-        // Aplica la posición. Considera si la posición X debe ser siempre 0 como en moveCamera
-        // o si debe usar la X de la vista como parece indicar esta función.
-        // Voy a mantener la lógica original de esta función: usar la X de la vista.
-        // Si quieres que siempre sea X=0, cambia newPos.x por 0f aquí.
-        mainCamera.transform.position = new Vector3(newPos.x, newPos.y, -10f); // Mantiene Z constante
-
-        // Actualiza currentIndex si es necesario para que moveCamera continúe desde aquí
-        currentIndex = viewIDs.IndexOf(viewID);
-        if(currentIndex == -1) currentIndex = 0; // Resetea si el ID no estaba (raro)
-
-        Debug.Log("Cámara movida directamente a ID " + viewID + " | Posición: " + mainCamera.transform.position);
     }
-}
+} 

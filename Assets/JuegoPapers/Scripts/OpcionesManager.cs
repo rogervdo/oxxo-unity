@@ -12,6 +12,9 @@ public class OpcionesManager : MonoBehaviour
 
     public UIManager uiManager; // Arrastra el UIManager aquí desde Unity
     public ImpactoView impactoViewer;
+    public IndicadoresManager indicadoresManager;
+
+    private Dictionary<int, List<Impacto>> impactosPorBoton = new();
 
     private void Awake()
     {
@@ -27,7 +30,7 @@ public class OpcionesManager : MonoBehaviour
     {
         string url = $"https://10.22.169.234:7058/Videojuego/opciones/{idCaso}";
         UnityWebRequest request = UnityWebRequest.Get(url);
-        request.certificateHandler = new ForceAcceptAll(); // Para certificados locales
+        request.certificateHandler = new ForceAcceptAll();
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -52,16 +55,17 @@ public class OpcionesManager : MonoBehaviour
             btn.onClick.RemoveAllListeners();
             btn.onClick.AddListener(() =>
             {
+                Debug.Log("🟡 Botón clicado con id_opcion: " + idOpcion + "Instancia:" + indicadoresManager.idInstancia);
+
+                StartCoroutine(AplicarImpactoEnBD(idOpcion)); // <--- esta debe estar
                 uiManager.RegistrarDecision(idOpcion);
             });
 
-            // Aquí está bien colocada
             StartCoroutine(CargarImpactosDeAPI(idOpcion, botonIndex));
         }
-
     }
 
-    public IEnumerator CargarImpactosDeAPI(int idOpcion, int botonIndex)
+    private IEnumerator CargarImpactosDeAPI(int idOpcion, int botonIndex)
     {
         string url = $"https://10.22.169.234:7058/Videojuego/opcion/{idOpcion}/indicadores";
         UnityWebRequest request = UnityWebRequest.Get(url);
@@ -81,5 +85,45 @@ public class OpcionesManager : MonoBehaviour
         {
             impactoViewer.MostrarImpactos(wrapper.impactos, botonIndex);
         }
+
+        impactosPorBoton[botonIndex] = wrapper.impactos;
     }
+
+    private IEnumerator AplicarImpactoEnBD(int idOpcion)
+    {
+        string url = "https://10.22.169.234:7058/Videojuego/aplicar_impacto";
+
+        var datos = new AplicarImpactoRequest
+        {
+            id_instancia = indicadoresManager.idInstancia,
+            id_opcion = idOpcion
+        };
+        string body = JsonUtility.ToJson(datos);
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(body);
+
+        Debug.Log("📤 Enviando a API con cuerpo: " + body);
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.certificateHandler = new ForceAcceptAll();
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("❌ Error al aplicar impacto: " + request.error);
+        }
+        else
+        {
+            Debug.Log("✅ Impacto aplicado correctamente.");
+            indicadoresManager.MostrarIndicadores(); // Refresca la hoja de indicadores
+        }
+        indicadoresManager.MostrarIndicadores();
+        uiManager.tabletOpcionesContainer.SetActive(false);
+    }
+
+
+
 }

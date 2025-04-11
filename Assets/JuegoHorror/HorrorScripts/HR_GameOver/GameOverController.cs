@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 public class GameOverController : MonoBehaviour
 {
 
-    // Inicia juego al presionarse boton "Play"
+    // Inicia juego al presionarse boton "reiniciar"
 
     public void StartGame()
     {
@@ -17,7 +17,6 @@ public class GameOverController : MonoBehaviour
         SceneManager.LoadScene("Menu_Main");
     }
 
-    // Sale del juego al presionarse "Exit". Preprocesador para diferenciar editor unity de juego
     public void ExitGame()
     {
 #if UNITY_EDITOR

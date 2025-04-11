@@ -89,16 +89,6 @@ public class OpcionesManager : MonoBehaviour
         impactosPorBoton[botonIndex] = wrapper.impactos;
     }
 
-    private IEnumerator AplicarImpactoYActualizar(int idOpcion, int botonIndex)
-    {
-        // 1. Aplicar impacto
-        yield return StartCoroutine(AplicarImpactoEnBD(idOpcion));
-
-        // 2. Refrescar los sliders visuales
-        yield return new WaitForSeconds(0.2f);
-        indicadoresManager.MostrarIndicadores();
-    }
-
     private IEnumerator AplicarImpactoEnBD(int idOpcion)
     {
         string url = "https://10.22.169.234:7058/Videojuego/aplicar_impacto";
@@ -130,7 +120,7 @@ public class OpcionesManager : MonoBehaviour
             Debug.Log("✅ Impacto aplicado correctamente.");
             indicadoresManager.MostrarIndicadores(); // Refresca la hoja de indicadores
         }
-        //StartCoroutine(ObtenerYActualizarIndicadoresDesdeBD());
+        indicadoresManager.MostrarIndicadores();
         uiManager.tabletOpcionesContainer.SetActive(false);
     }
 

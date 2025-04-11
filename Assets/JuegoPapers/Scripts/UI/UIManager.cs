@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using System.Linq;
 using UnityEngine.Networking;
 
@@ -104,10 +105,29 @@ public class UIManager : MonoBehaviour
         indiceCaso++;
 
         if (indiceCaso >= ordenCasosAleatorios.Count)
-        {
-            Debug.Log("Juego terminado");
-            return;
-        }
+{
+    Debug.Log("Juego terminado");
+
+    // Calcular puntaje total (suma de sliders)
+    int puntajeFinal = indicadoresManager.SumarValoresFinales();
+
+    Debug.Log("🎯 Puntaje total: " + puntajeFinal);
+
+    // Guardar el puntaje para mostrarlo en la pantalla final
+    PlayerPrefs.SetInt("PuntajeFinal", puntajeFinal);
+    PlayerPrefs.Save();
+
+    // Decidir el final
+    if (puntajeFinal >= 60)
+        SceneManager.LoadScene("WinScenePP");
+    else if (puntajeFinal <= 45)
+        SceneManager.LoadScene("LoseScenePP");
+    else
+        SceneManager.LoadScene("AlternEnd");
+
+    return;
+}
+
 
         var caso = listaCasos[indiceCaso];
         int idSprite = ordenSpritesAleatorios[indiceCaso];

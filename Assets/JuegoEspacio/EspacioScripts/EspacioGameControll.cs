@@ -90,4 +90,39 @@ void SetReference()
     {
         SceneManager.LoadScene("MenuScene");
     }
+
+public void FlipSpawnerPosition()
+{
+    // 🔁 Obtener todos los spawners en la escena
+    var spawners = FindObjectsByType<EnemySpawnerEspacial>(FindObjectsSortMode.None);
+
+    foreach (var spawner in spawners)
+    {
+        spawner.CambiarLadoSpawner();
+    }
+
+    // ✅ Detectar si el primer spawner está a la derecha
+    bool spawnerADerecha = spawners.Length > 0 && spawners[0].transform.position.x > 0;
+
+    // 🔁 Actualizar la dirección visual de la nave
+    var nave = FindAnyObjectByType<NaveControlEspacial>();
+    if (nave != null)
+    {
+        nave.ActualizarDireccionVisual(spawnerADerecha);
+    }
+
+    // 🔁 Cambiar la dirección del parallax si lo hay
+    var fondo = FindAnyObjectByType<ParallaxController>();
+    if (fondo != null)
+    {
+        fondo.CambiarDireccion(spawnerADerecha);
+    }
+}
+
+
+// Detecta si ahora está a la derecha
+private bool spawnerADerecha => Object.FindObjectsOfType<EnemySpawnerEspacial>()[0].transform.position.x < 0 ? false : true;
+
+    
+
 }

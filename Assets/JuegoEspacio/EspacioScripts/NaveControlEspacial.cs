@@ -2,11 +2,14 @@ using UnityEngine;
 
 public class NaveControlEspacial : MonoBehaviour
 {
-   public float movespeed;
+    public float movespeed;
     public float jumpForce;
     public Rigidbody2D rig;
     public SpriteRenderer sr;
     Animator animatorController;
+
+    public bool mirandoDerecha = true; // hacia dónde está viendo visualmente la nave
+    public bool mirandoDerechaSpawner = true; // hacia qué lado está el spawner
 
     void Start()
     {
@@ -17,63 +20,79 @@ public class NaveControlEspacial : MonoBehaviour
     {
         Vector2 direction = rig.linearVelocity;
 
-        if (direction.magnitude > 0.1f) // Solo si se mueve
+        if (direction.magnitude > 0.1f)
         {
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-            // Limita el ángulo a un rango razonable (por ejemplo, de -90° a +90°)
-            angle = Mathf.Clamp(angle, -25f, 25f);
+            // 🔁 Invertimos la rotación si el spawner está a la izquierda
+            if (!mirandoDerechaSpawner)
+            {
+                angle *= -1f;
+            }
 
-            // Suaviza la rotación hacia el ángulo deseado
+            angle = Mathf.Clamp(angle, -25f, 25f);
             Quaternion targetRotation = Quaternion.Euler(0, 0, angle);
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
         }
         else
         {
-            // Si no se mueve, regresa lentamente a 0°
             Quaternion targetRotation = Quaternion.Euler(0, 0, 0);
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 2f);
         }
     }
 
-
-
-
     private void FixedUpdate()
     {
         float xInput = Input.GetAxis("Horizontal");
-    float yInput = Input.GetAxis("Vertical");
-    rig.linearVelocity = new Vector2(xInput * movespeed, yInput * movespeed);
+        float yInput = Input.GetAxis("Vertical");
 
+        // Solo moverse libremente en ambas direcciones
+        rig.linearVelocity = new Vector2(xInput * movespeed, yInput * movespeed);
 
-         if(xInput != 0 && rig.linearVelocity.y == 0)
+        // 🔒 Limitar hacia dónde puede mirar según el lado del spawner
+        if (mirandoDerechaSpawner)
         {
-            UpdateAnimation(PlayerAnimation.ForwardEspacio);//Animacion para caminar
+            mirandoDerecha = true;
+            sr.flipX = false;
         }
         else
         {
-            UpdateAnimation(PlayerAnimation.IdleEspacio);//Animacion quieto
+            mirandoDerecha = false;
+            sr.flipX = true;
+        }
+
+        if (xInput != 0 && rig.linearVelocity.y == 0)
+        {
+            UpdateAnimation(PlayerAnimation.ForwardEspacio);
+        }
+        else
+        {
+            UpdateAnimation(PlayerAnimation.IdleEspacio);
         }
     }
 
-        public enum PlayerAnimation
+    public enum PlayerAnimation
     {
         IdleEspacio, ForwardEspacio,
     }
 
-    //Acutaliza la animacion de jugador segun sus condiciones
     void UpdateAnimation(PlayerAnimation nameAnimation)
     {
-        switch(nameAnimation)
+        switch (nameAnimation)
         {
             case PlayerAnimation.IdleEspacio:
-                animatorController.SetBool("isMovingEspacio",false);
+                animatorController.SetBool("isMovingEspacio", false);
                 break;
             case PlayerAnimation.ForwardEspacio:
-                animatorController.SetBool("isMovingEspacio",true);
-                animatorController.SetBool("isIdleEspacio",false);
+                animatorController.SetBool("isMovingEspacio", true);
+                animatorController.SetBool("isIdleEspacio", false);
                 break;
         }
-    }   
-    
+    }
+
+    // 👇 Llama este método desde FlipSpawnerPosition()
+    public void ActualizarDireccionVisual(bool nuevaDireccionDerecha)
+    {
+        mirandoDerechaSpawner = nuevaDireccionDerecha;
+    }
 }

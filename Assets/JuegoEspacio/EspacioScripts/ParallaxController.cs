@@ -2,29 +2,32 @@ using UnityEngine;
 
 public class ParallaxController : MonoBehaviour
 {
-    public Vector2 scrollDirection = Vector2.left; // Dirección del movimiento del fondo
-    public float scrollSpeed = 0.5f; // Velocidad del parallax
-    public float tileSize = 20f; // Tamaño del sprite para hacer el loop infinito
+    public float scrollSpeed = 0.5f;
+    private int direccion = 1; // 1 = hacia la derecha, -1 = hacia la izquierda
 
     private Vector3 startPos;
+    private float length;
 
     void Start()
     {
         startPos = transform.position;
+        length = GetComponent<SpriteRenderer>().bounds.size.x;
     }
 
     void Update()
     {
-        // Movimiento del fondo
-        transform.position += (Vector3)(scrollDirection * scrollSpeed * Time.deltaTime);
+        // Mueve el fondo horizontalmente
+        transform.position += Vector3.right * scrollSpeed * direccion * Time.deltaTime;
 
-        // Calcula cuánto se ha movido desde el inicio
-        float distanceMoved = (transform.position - startPos).magnitude;
-
-        // Si se movió más de una "tile", resetea
-        if (distanceMoved >= tileSize)
+        float distancia = Mathf.Abs(transform.position.x - startPos.x);
+        if (distancia >= length)
         {
             startPos = transform.position;
         }
+    }
+
+    public void CambiarDireccion(bool aLaDerecha)
+    {
+        direccion = aLaDerecha ? 1 : -1;
     }
 }

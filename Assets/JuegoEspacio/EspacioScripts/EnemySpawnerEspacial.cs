@@ -9,6 +9,8 @@ public class EnemySpawnerEspacial : MonoBehaviour
     public float minHeight;
     public float timeToSpawnMin; 
     public float timeToSpawnMax; 
+    private float posicionOriginalX;
+
 
      IEnumerator SpawnerTimer()
     {
@@ -22,9 +24,25 @@ public class EnemySpawnerEspacial : MonoBehaviour
         StartCoroutine(SpawnerTimer());
     }
 
-    void Start()
+   void Start()
+{
+    posicionOriginalX = transform.position.x;
+    StartCoroutine(SpawnerTimer());
+}
+
+public void CambiarLadoSpawner()
+{
+    posicionOriginalX *= -1;
+    transform.position = new Vector3(posicionOriginalX, transform.position.y, transform.position.z);
+}
+public void FlipSpawnerPosition()
+{
+    foreach (var spawner in FindObjectsOfType<EnemySpawnerEspacial>())
     {
-        StartCoroutine(SpawnerTimer());
+        spawner.CambiarLadoSpawner();
     }
+}
+
+
 
 }

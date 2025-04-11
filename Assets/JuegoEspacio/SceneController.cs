@@ -62,9 +62,16 @@ public class SceneController : MonoBehaviour
 
     public void Regresar_M()
     {
+        if (GameSessionManager.Instance != null)
+        {
+            GameSessionManager.Instance.ReiniciarVidas(); // <-- resetea vidas
+        }
         Time.timeScale = 1f;
         SceneManager.LoadScene("Menu_Main");
     }
+
+
+    
 
 
 

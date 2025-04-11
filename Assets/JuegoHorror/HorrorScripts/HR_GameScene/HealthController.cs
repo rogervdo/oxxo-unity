@@ -264,7 +264,6 @@ public class HealthController : MonoBehaviour
         }
         else
         {
-            // <<< LOG API MANTENIDO (Informa por qué no se envía)
             Debug.LogWarning("No se enviará puntaje a API (Falta UserID/UserManager/URL).");
         }
         // --- Fin Llamada API ---
@@ -282,13 +281,13 @@ public class HealthController : MonoBehaviour
         // --- 5. Carga escena final después de delay ---
         // Inicia Coroutine que espera tiempo real antes de cargar escena Game Over.
         StartCoroutine(LoadGameOverAfterDelay(3.0f)); // Espera 3 segundos reales.
-    } // --- Fin método TriggerGameOverSequence ---
+    } 
 
     // Coroutine para esperar tiempo real y cargar escena.
     private IEnumerator LoadGameOverAfterDelay(float delay)
     {
         yield return new WaitForSecondsRealtime(delay); // Espera tiempo real.
-        Time.timeScale = 1f; // ¡¡Restaurar TimeScale ANTES de cargar!!
+        Time.timeScale = 1f; 
         SceneManager.LoadScene("HR_GameOver"); // Carga escena final.
     }
 

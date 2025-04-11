@@ -9,7 +9,7 @@ public class IndicadoresManager : MonoBehaviour
 {
     public GameObject prefabIndicadorUI;
     public Transform contenedorIndicadores;
-    public int idInstancia; // Establece esto desde tu UIManager o controlador principal
+    public int idInstancia;
 
     private Dictionary<int, Slider> slidersIndicadores = new Dictionary<int, Slider>();
 
@@ -19,12 +19,11 @@ public class IndicadoresManager : MonoBehaviour
         StartCoroutine(CargarIndicadores());
     }
 
-
     IEnumerator CargarIndicadores()
     {
-        string url = $"https://10.22.169.234:7058/Videojuego/indicadores/{idInstancia}";
+        string url = $"https://10.22.169.234:7058/Videojuego/valores_actuales/{idInstancia}";
         UnityWebRequest req = UnityWebRequest.Get(url);
-        req.certificateHandler = new ForceAcceptAll(); // Para SSL local
+        req.certificateHandler = new ForceAcceptAll(); // Certificado local
         yield return req.SendWebRequest();
 
         if (req.result != UnityWebRequest.Result.Success)
@@ -37,21 +36,41 @@ public class IndicadoresManager : MonoBehaviour
         IndicadoresListWrapper wrapper = JsonUtility.FromJson<IndicadoresListWrapper>(json);
 
         foreach (Transform child in contenedorIndicadores)
-            Destroy(child.gameObject); // Limpia los indicadores anteriores
+            Destroy(child.gameObject);
 
         foreach (Indicador indicador in wrapper.indicadores)
-        {
-            Debug.Log("Creando indicador: " + indicador.nombre);
-            
-            GameObject nuevo = Instantiate(prefabIndicadorUI, contenedorIndicadores);
-            nuevo.transform.Find("NombreIndicador").GetComponent<Text>().text = indicador.nombre;
+        
+{
+    Debug.Log("Creando indicador: " + indicador.nombre);
 
-            Slider barra = nuevo.transform.Find("BarraIndicador").GetComponent<Slider>();
-            barra.maxValue = 15;
-            barra.value = 3 + indicador.impacto_total;
+    GameObject nuevo = Instantiate(prefabIndicadorUI, contenedorIndicadores);
+    var nombreTxt = nuevo.transform.Find("NombreIndicador");
+    var barraObj = nuevo.transform.Find("BarraIndicador");
+    var valorTexto = nuevo.transform.Find("ValorTexto"); // 👈 Asegúrate que coincida el nombre
 
-            slidersIndicadores[indicador.id_indicador] = barra;
-        }
+    if (nombreTxt == null) Debug.LogError("No se encontró NombreIndicador");
+    if (barraObj == null) Debug.LogError("No se encontró BarraIndicador");
+    if (valorTexto == null) Debug.LogError("No se encontró ValorTexto"); // Validación opcional
+
+    nombreTxt.GetComponent<Text>().text = indicador.nombre;
+
+    Slider barra = barraObj.GetComponent<Slider>();
+    barra.maxValue = 15;
+    barra.value = indicador.valor_actual;
+
+    // 👇 Asigna el valor al texto
+    Text textoValor = valorTexto.GetComponent<Text>();
+    textoValor.text = barra.value.ToString("0"); // sin decimales
+
+    // 👇 Actualiza el texto en tiempo real cuando el valor cambie
+    barra.onValueChanged.AddListener(val =>
+    {
+        textoValor.text = val.ToString("0");
+    });
+
+    slidersIndicadores[indicador.id_indicador] = barra;
+}
+
 
     }
 

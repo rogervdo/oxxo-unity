@@ -3,8 +3,9 @@ using UnityEngine;
 [System.Serializable]
 public class Decision
 {
-    public int instanciaId;
-    public int opcionId;
+    public int Id_Instancia;
+    public int id_opcion;
     public int ordenCaso;
 }
+
 

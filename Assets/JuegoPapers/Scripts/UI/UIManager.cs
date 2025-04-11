@@ -168,7 +168,7 @@ public class UIManager : MonoBehaviour
 
     private IEnumerator InicializarJuegoDesdeAPI()
     {
-        // 1. Crear nueva instancia
+        // 1. Crear nueva instancia del juego
         UnityWebRequest request = UnityWebRequest.PostWwwForm("https://10.22.169.234:7058/Videojuego/instancia/2", "");
         request.certificateHandler = new ForceAcceptAll();
         yield return request.SendWebRequest();
@@ -182,10 +182,22 @@ public class UIManager : MonoBehaviour
         InstanciaRespuesta data = JsonUtility.FromJson<InstanciaRespuesta>(request.downloadHandler.text);
         idInstancia = data.id_instancia;
 
-            indicadoresManager.idInstancia = idInstancia;
+        // 2. Inicializar los valores temporales de los indicadores
+        UnityWebRequest initValores = UnityWebRequest.PostWwwForm($"https://10.22.169.234:7058/Videojuego/inicializar_valores/{idInstancia}", "");
+        initValores.certificateHandler = new ForceAcceptAll();
+        yield return initValores.SendWebRequest();
+
+        if (initValores.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Error inicializando valores: " + initValores.error);
+            yield break;
+        }
+
+        // 3. Mostrar los indicadores con valores iniciales
+        indicadoresManager.idInstancia = idInstancia;
         indicadoresManager.MostrarIndicadores();
 
-        // 2. Obtener todos los casos
+        // 4. Obtener todos los casos
         UnityWebRequest requestCasos = UnityWebRequest.Get("https://10.22.169.234:7058/Videojuego");
         requestCasos.certificateHandler = new ForceAcceptAll();
         yield return requestCasos.SendWebRequest();
@@ -199,12 +211,24 @@ public class UIManager : MonoBehaviour
         listaCasos = JsonHelper.FromJson<Caso>(requestCasos.downloadHandler.text).ToList();
         ordenCasosAleatorios = listaCasos.Select(c => c.id_caso).ToList();
 
-        // 3. Orden aleatorio de sprites
+        // 5. Orden aleatorio de sprites
         ordenSpritesAleatorios = Enumerable.Range(0, 6).OrderBy(x => Random.value).ToList();
 
         indiceCaso = -1;
         CargarSiguienteCaso();
     }
+
+    public int GetOrdenDelCasoActual()
+    {
+        return indiceCaso;
+    }
+
+    public int GetIdInstancia()
+{
+    return idInstancia;
+}
+
+
 
 
 

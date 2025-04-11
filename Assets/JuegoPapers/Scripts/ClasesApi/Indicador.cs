@@ -7,12 +7,12 @@ public class Indicador
     public string nombre;
     public string unidad;
     public string categoria;
-    public int impacto_total;
+    public int valor_actual ;
 
     public Indicador(string nombre, int valor)
     {
         this.nombre = nombre;
-        this.impacto_total = valor;
+        this.valor_actual  = valor;
     }
 }
 

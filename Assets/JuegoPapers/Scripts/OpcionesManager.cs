@@ -56,6 +56,7 @@ public class OpcionesManager : MonoBehaviour
             btn.onClick.AddListener(() =>
             {
                 Debug.Log("🟡 Botón clicado con id_opcion: " + idOpcion + "Instancia:" + indicadoresManager.idInstancia);
+
                 StartCoroutine(AplicarImpactoEnBD(idOpcion)); // <--- esta debe estar
                 uiManager.RegistrarDecision(idOpcion);
             });
@@ -107,7 +108,6 @@ public class OpcionesManager : MonoBehaviour
             id_instancia = indicadoresManager.idInstancia,
             id_opcion = idOpcion
         };
-
         string body = JsonUtility.ToJson(datos);
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(body);
 
@@ -130,6 +130,8 @@ public class OpcionesManager : MonoBehaviour
             Debug.Log("✅ Impacto aplicado correctamente.");
             indicadoresManager.MostrarIndicadores(); // Refresca la hoja de indicadores
         }
+        //StartCoroutine(ObtenerYActualizarIndicadoresDesdeBD());
+        uiManager.tabletOpcionesContainer.SetActive(false);
     }
 
 

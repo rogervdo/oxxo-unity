@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class QuestionMark : MonoBehaviour
 {
@@ -93,17 +94,39 @@ public class QuestionMark : MonoBehaviour
                 botonesOpciones[index].onClick.RemoveAllListeners();
                 botonesOpciones[index].onClick.AddListener(() =>
                 {
+                    // 🟢 Aumenta preguntas respondidas SIEMPRE
+                    GameSessionManager.Instance?.AumentarPreguntasRespondidas();
+
                     if (!esCorrecta)
                     {
                         var controlador = FindFirstObjectByType<ControladorJuegoEspacial>();
                         if (controlador != null)
                         {
                             controlador.SpendLives();
+
+                            if (GameSessionManager.Instance.ObtenerVidas() <= 0)
+                            {
+                                SceneManager.LoadScene("FinalPreguntas");
+                                return;
+                            }
                         }
                     }
                     else
                     {
                         Debug.Log("✅ ¡Respuesta correcta!");
+                        int puntos = pregunta.puntaje;
+                        GameSessionManager.Instance?.AgregarPuntos(puntos);
+                        GameSessionManager.Instance?.AgregarPuntosPreguntas(puntos);
+                        GameSessionManager.Instance?.AumentarRespuestasCorrectas(); // ✅ IMPORTANTE
+                    }
+
+
+                    // ✅ Si ya respondió 6 en total → final
+                    if (GameSessionManager.Instance != null &&
+                        GameSessionManager.Instance.preguntasRespondidas >= 6)
+                    {
+                        SceneManager.LoadScene("FinalPreguntas");
+                        return;
                     }
 
                     var ui = FindFirstObjectByType<UIControllerEspacio>();
@@ -148,11 +171,11 @@ public class QuestionMark : MonoBehaviour
         if (timePanel != null) timePanel.SetActive(false);
         if (signoPregunta != null) signoPregunta.SetActive(false);
 
-        // Vuelve a mostrar todos los botones para la próxima pregunta
         foreach (var boton in botonesOpciones)
         {
             if (boton != null)
                 boton.gameObject.SetActive(true);
         }
     }
+    
 }

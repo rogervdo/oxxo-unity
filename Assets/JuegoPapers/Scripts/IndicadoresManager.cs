@@ -68,9 +68,8 @@ public class IndicadoresManager : MonoBehaviour
         textoValor.text = val.ToString("0");
     });
 
-    slidersIndicadores[indicador.id_indicador] = barra;
+   slidersIndicadores[indicador.id_indicador] = barra;
 }
-
 
     }
 
@@ -85,4 +84,14 @@ public class IndicadoresManager : MonoBehaviour
             }
         }
     }
+
+    public int SumarValoresFinales()
+    {
+        int suma = 0;
+        foreach (var slider in slidersIndicadores.Values)
+            suma += Mathf.RoundToInt(slider.value); // Asegura que sea int
+
+        return suma;
+    }
+
 }

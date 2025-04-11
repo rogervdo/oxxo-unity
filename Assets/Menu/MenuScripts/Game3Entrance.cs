@@ -17,7 +17,7 @@ public class Game3Entrance : MonoBehaviour
     {
         if (playerIsNear && Input.GetKeyDown(KeyCode.E))
         {
-            SceneManager.LoadScene("CutScene");
+            SceneManager.LoadScene("StartScreen");
         }
     }
 

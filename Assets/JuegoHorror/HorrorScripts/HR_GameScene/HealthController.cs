@@ -1,8 +1,8 @@
 using UnityEngine;
-using UnityEngine.UI;          // Para Image, Text
-using UnityEngine.SceneManagement; // Para cargar escenas
-using System.Collections;       // Para Coroutines (IEnumerator)
-using UnityEngine.Networking;  // Para APIScoreSender
+using UnityEngine.UI;         
+using UnityEngine.SceneManagement; 
+using System.Collections;       
+using UnityEngine.Networking;  
 
 
 [RequireComponent(typeof(AudioSource))]
@@ -114,7 +114,7 @@ public class HealthController : MonoBehaviour
             heartbeatAudioSource.clip = heartbeatSoundClip;
             heartbeatAudioSource.loop = true;
             heartbeatAudioSource.playOnAwake = false;
-            heartbeatAudioSource.volume = 0f; // Empieza en silencio.
+            heartbeatAudioSource.volume = 0f; 
             heartbeatAudioSource.pitch = minHeartbeatPitch;
         }
         else

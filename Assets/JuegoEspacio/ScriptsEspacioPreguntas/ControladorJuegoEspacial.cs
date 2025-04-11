@@ -1,5 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
+using System.Collections;
+using UnityEngine.SceneManagement;
+
 
 
 public class ControladorJuegoEspacial : MonoBehaviour
@@ -73,6 +77,13 @@ public class ControladorJuegoEspacial : MonoBehaviour
     GameSessionManager.Instance.QuitarVida();
     vidasUI.UpdateLives();
 
+    // 💥 Si ya no tiene vidas, termina el juego
+    if (GameSessionManager.Instance.ObtenerVidas() <= 0)
+    {
+        SceneManager.LoadScene("FinalPreguntas");
+        return;
+    }
+
     switch (signoActivo)
     {
         case 1:
@@ -87,8 +98,47 @@ public class ControladorJuegoEspacial : MonoBehaviour
     }
 }
 
+    public void GuardarResultadoFinalYTerminar()
+    {
+        SceneManager.LoadScene("FinalPreguntas");
+    }
 
+    public void GuardarResultadoFinalYTerminar2()
+{
+    int puntajeFinal = GameSessionManager.Instance.ObtenerPuntaje();
+    int idInstancia = APIManager.Instance.idInstancia;
+    int idUsuario = UserManager.Instance.GetCurrentUser2(); // 👈 Agregado
 
-
-
+    StartCoroutine(EnviarResultado(puntajeFinal, idInstancia, idUsuario));
 }
+
+
+private IEnumerator EnviarResultado(int puntaje, int idInstancia, int idUsuario)
+{
+    string url = "https://localhost:7058/Score/SaveGameResult";
+
+    WWWForm form = new WWWForm();
+    form.AddField("puntaje", puntaje);
+    form.AddField("idInstancia", idInstancia);
+    form.AddField("id_usuario", idUsuario); // 👈 Enviar también el usuario
+
+    UnityWebRequest request = UnityWebRequest.Post(url, form);
+    request.certificateHandler = new ForceAcceptAll();
+    yield return request.SendWebRequest();
+
+    if (request.result == UnityWebRequest.Result.Success)
+    {
+        Debug.Log("✅ Puntaje guardado correctamente");
+        SceneManager.LoadScene("Escena_Ganar_Q");
+    }
+    else
+    {
+        Debug.LogError("❌ Error al guardar puntaje: " + request.error);
+    }
+}
+}
+
+
+
+
+

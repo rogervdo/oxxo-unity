@@ -4,6 +4,7 @@ public class UserManager : MonoBehaviour
 {
     public static UserManager Instance { get; private set; }
     public int? CurrentUserId { get; private set; }
+     private int idUsuarioActual = -1;
 
     void Awake()
     {
@@ -19,8 +20,20 @@ public class UserManager : MonoBehaviour
     public void SetCurrentUser(int userId) {
         CurrentUserId = userId;
     }
+    
 
     public void ClearUser() {
         CurrentUserId = null;
     }
+
+    public void SetCurrentUser2(int id)
+    {
+        idUsuarioActual = id;
+    }
+
+    public int GetCurrentUser2()
+    {
+        return idUsuarioActual;
+    }
 }
+

@@ -6,6 +6,7 @@ public class UserManager : MonoBehaviour
     public static UserManager Instance { get; private set; }
     // Almacena el ID del usuario actualmente logueado. Null si no hay usuario logueado.
     public int? CurrentUserId { get; private set; }
+     private int idUsuarioActual = -1;
 
     void Awake()
     {
@@ -24,6 +25,7 @@ public class UserManager : MonoBehaviour
         CurrentUserId = userId;
 
     }
+    
 
     // Limpia el ID del usuario actual (cierra sesión).
     public void ClearUser() {
@@ -41,3 +43,4 @@ public class UserManager : MonoBehaviour
     }
 
 } 
+

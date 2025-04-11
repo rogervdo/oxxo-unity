@@ -47,12 +47,17 @@ public class EspacioGameControll : MonoBehaviour
 
     // Resta una vida
     public void SpendLives()
-    {
-        int newLives = GetCurrentLives() - 1;
-        PlayerPrefs.SetInt("lives", newLives);
-        uiConroller.UpdateLives(); 
-        checkGameOver();
-    }
+{
+    int newLives = GetCurrentLives() - 1;
+    PlayerPrefs.SetInt("lives", newLives);
+    uiConroller.UpdateLives();
+
+    // Restar puntos al perder vida
+    ScoreManager.Instance.RestarPorGolpe();
+
+    checkGameOver();
+}
+
 
     // Verifica si el juego ha terminado
     public void checkGameOver()
@@ -65,9 +70,20 @@ public class EspacioGameControll : MonoBehaviour
 
     // Activa la escena de fin de juego
     public void ActiveEndScene()
-    {
-        SceneManager.LoadScene("Escena_Perder_S");
-    }
+{
+    int scoreFinal = ScoreManager.Instance.score;
+
+    PlayerPrefs.SetInt("lastScoreEspacial", scoreFinal);
+    PlayerPrefs.Save();
+
+    // 👇 Manda el score a la base de datos
+    if (ScoreSender.Instance != null)
+        ScoreSender.Instance.EnviarScoreFinal(scoreFinal);
+
+    SceneManager.LoadScene("Escena_Perder_S");
+}
+
+
 
     // Configura referencias de objetos adicionales
 
@@ -88,6 +104,7 @@ void SetReference()
     // Carga la escena del menú
     public void GotoMenu()
     {
+        PlayerPrefs.DeleteKey("lives"); // o puedes usar SetInt("lives", 3);
         SceneManager.LoadScene("MenuScene");
     }
 

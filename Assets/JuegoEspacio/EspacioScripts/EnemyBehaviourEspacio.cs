@@ -2,33 +2,35 @@ using UnityEngine;
 
 public class EnemyBehaviourEspacio : MonoBehaviour
 {
-    public float velocity; // Velocidad del enemigo
+    private float velocity;
 
-    // Start is called once before the first execution of Update
-    void Start() { }
+    void Start()
+    {
+        float xPos = transform.position.x;
 
-    // Update is called once per frame
+        // 👇 Establece velocidad según el lado donde nació
+        if (xPos > 0)
+            velocity = -10f; // si aparece a la derecha, va hacia la izquierda
+        else
+            velocity = 10f;  // si aparece a la izquierda, va hacia la derecha
+    }
+
     void Update()
     {
-        // Mueve al enemigo a la derecha
-        this.transform.position += Vector3.right * Time.deltaTime * velocity;
+        transform.position += Vector3.right * Time.deltaTime * velocity;
 
-        // Si el enemigo sale del límite, se destruye
-        if(transform.position.x <= -50)
+        if (transform.position.x <= -50f || transform.position.x >= 70f)
         {
-            GameObject.Destroy(this.gameObject);
+            Destroy(this.gameObject);
         }
     }
 
-    // Detecta la colisión con el jugador
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player"))
         {
-            // Acción al colisionar con el jugador
-            //EspacioGameControll.Instance.SFXManager.getCoin();
             EspacioGameControll.Instance.SpendLives();
-            GameObject.Destroy(this.gameObject);
+            Destroy(this.gameObject);
         }
     }
 }

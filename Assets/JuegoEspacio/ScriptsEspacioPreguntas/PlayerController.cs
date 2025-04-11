@@ -8,12 +8,20 @@ public class PlayerController : MonoBehaviour
     public SpriteRenderer sr;
     private Vector2 moveInput;
     private Animator playerAnimator;
+    [SerializeField] private GameObject gameSessionPrefab; // Asigna el prefab desde Unity
+
 
     void Start()
     {
-       playerRb = GetComponent<Rigidbody2D>();
-       playerAnimator = GetComponent<Animator>();
+        if (GameSessionManager.Instance == null)
+        {
+            Instantiate(gameSessionPrefab);
+        }
+
+        playerRb = GetComponent<Rigidbody2D>();
+        playerAnimator = GetComponent<Animator>();
     }
+
 
     void Update()
     {

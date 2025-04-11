@@ -4,24 +4,12 @@ using UnityEngine.SceneManagement;
 
 public class GameOverController : MonoBehaviour
 {
-    public Text winLoseText;
-    // Inicia juego al presionarse boton "Play"
 
-    void Start()
-    {
-        if (PlayerPrefs.GetInt("isWin") == 1)
-        {
-            winLoseText.text = "Ganaste!";
-        }
-        else if (PlayerPrefs.GetInt("isWin") == 0)
-        {
-            winLoseText.text = "Perdiste!";
-        }
-    }
+    // Inicia juego al presionarse boton "reiniciar"
 
     public void StartGame()
     {
-        SceneManager.LoadScene("HR_GameScene");
+        SceneManager.LoadScene("HR_StartBuffer");
     }
 
     public void getMenu()
@@ -29,7 +17,6 @@ public class GameOverController : MonoBehaviour
         SceneManager.LoadScene("Menu_Main");
     }
 
-    // Sale del juego al presionarse "Exit". Preprocesador para diferenciar editor unity de juego
     public void ExitGame()
     {
 #if UNITY_EDITOR

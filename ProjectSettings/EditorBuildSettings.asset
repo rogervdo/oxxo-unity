@@ -48,7 +48,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Espacio/SCENES/VJ_Nave.unity
     guid: a0ad4af30105f394fb5f08667e4982c7
   - enabled: 1
-    path: Assets/Scenes/Espacio/SCENES/QuestionsGame/QuestionsGame2/EngineRoom_Q.unity
+    path: Assets/Scenes/Espacio/SCENES/QuestionsGame2/EngineRoom_Q.unity
     guid: aa1eb5e6d0d77da46911d6c7ca4e6c18
   - enabled: 1
     path: Assets/Scenes/Espacio/SCENES/QuestionsGame2/ControlRoom_Q.unity

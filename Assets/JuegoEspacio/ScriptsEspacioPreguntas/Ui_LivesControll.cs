@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections; // ← Este es el que necesitas para usar IEnumerator
+
 
 public class Ui_LivesControll : MonoBehaviour
 {   
@@ -9,20 +11,41 @@ public class Ui_LivesControll : MonoBehaviour
     public Image[] livesImages; // Imágenes de las vidas restantes
     int lives = 3; // Número inicial de vidas
     int time;
-    void Start()
+  void Start()
+{
+    StartCoroutine(EsperarGameManager());
+}
+
+IEnumerator EsperarGameManager()
+{
+    while (GameSessionManager.Instance == null)
+        yield return null;
+
+    lives = GameSessionManager.Instance.ObtenerVidas();
+    UpdateLives(); // <-- fuerza la actualización visual de los sprites
+}
+
+
+
+public void UpdateLives()
+{
+    lives = GameSessionManager.Instance.ObtenerVidas();
+
+    // Primero, resetear todas las vidas a sprite normal (si usas otro sprite base)
+    for (int i = 0; i < livesImages.Length; i++)
     {
-        time = EspacioGameControll.Instance.timeToWin; // Establece el tiempo de la partida
-        lives = PlayerPrefs.GetInt("lives", 3); // Carga las vidas guardadas 
+        // Optional: poner sprite normal aquí si tienes uno como "vida llena"
+        // livesImages[i].sprite = fullLifeSprite;
     }
 
-    public void UpdateLives()
+    // Luego marcar las vidas perdidas con el sprite "gastado"
+    for (int i = lives; i < livesImages.Length; i++)
     {
-        lives = EspacioGameControll.Instance.GetCurrentLives(); // Obtiene las vidas actuales
-        if (lives > 0 && lives - 1 < livesImages.Length)
-        {
-            livesImages[lives - 1].sprite = spendLives; // Actualiza la imagen de la vida perdida
-        }
+        livesImages[i].sprite = spendLives;
     }
+}
+
+
 
 
 }

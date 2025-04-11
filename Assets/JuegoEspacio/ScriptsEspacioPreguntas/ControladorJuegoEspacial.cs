@@ -70,9 +70,7 @@ public class ControladorJuegoEspacial : MonoBehaviour
 
     public void SpendLives()
 {
-    int currentLives = PlayerPrefs.GetInt("lives", 3);
-    int newLives = currentLives - 1;
-    PlayerPrefs.SetInt("lives", newLives);
+    GameSessionManager.Instance.QuitarVida();
     vidasUI.UpdateLives();
 
     switch (signoActivo)

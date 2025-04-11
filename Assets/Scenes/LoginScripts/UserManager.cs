@@ -29,4 +29,15 @@ public class UserManager : MonoBehaviour
     public void ClearUser() {
         CurrentUserId = null;
     }
+
+    public void SetCurrentUser2(int id)
+    {
+        CurrentUserId = id;
+    }
+
+    public int GetCurrentUser2()
+    {
+        return CurrentUserId ?? -1;
+    }
+
 } 

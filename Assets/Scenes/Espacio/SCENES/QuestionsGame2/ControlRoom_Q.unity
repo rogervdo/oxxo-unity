@@ -625,7 +625,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31e1ee4b3c8d84689b99809fe2af9a8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiBaseUrl: https://10.22.197.131:7058
+  apiBaseUrl: https://localhost:7058
   preguntasEspaciales: []
 --- !u!4 &142359120
 Transform:

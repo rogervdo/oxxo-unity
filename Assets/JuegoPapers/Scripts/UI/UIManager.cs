@@ -79,7 +79,6 @@ public class UIManager : MonoBehaviour
     public void OpcionSeleccionada()
     {
         // 1. Ocultar opciones de la tablet
-        tabletOpcionesContainer.SetActive(false);
         opcionesYaMostradas = false;
 
         // 2. Cerrar el clipboard si está abierto

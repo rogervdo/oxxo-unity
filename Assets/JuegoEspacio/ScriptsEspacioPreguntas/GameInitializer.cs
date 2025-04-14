@@ -4,6 +4,8 @@ public class GameInitializer : MonoBehaviour
 {
     public GameObject canvasInstrucciones;
     public GameObject uiPanel;
+    public UIControllerEspacio uiControllerEspacio; 
+
 
     void Start()
     {
@@ -29,5 +31,19 @@ public class GameInitializer : MonoBehaviour
         
         if (uiPanel != null)
             uiPanel.SetActive(true);
+    }
+
+    public void IniciarJuegoNAVE()
+    {
+        Time.timeScale = 1f;
+
+        if (canvasInstrucciones != null)
+            canvasInstrucciones.SetActive(false);
+        
+        if (uiPanel != null)
+            uiPanel.SetActive(true);
+
+        if (uiControllerEspacio != null)
+            uiControllerEspacio.StartTimer(); 
     }
 }

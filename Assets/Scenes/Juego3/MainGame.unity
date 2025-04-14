@@ -4420,6 +4420,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   clipboardPanel: {fileID: 889267430}
   libroPanel: {fileID: 81593717}
+  apiBaseUrl: https://10.22.169.234:7058
+  scoreApiEndpointPath: /Score/SaveGameResult
+  scoreGameId: 1
+  commonEndSceneName: EndScene
   tabletOpcionesContainer: {fileID: 779003755}
   liderMovimiento: {fileID: 1248892128}
   imagenLider: {fileID: 1236935979}

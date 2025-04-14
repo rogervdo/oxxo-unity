@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 994ec77dbc7a8594b97a276a9e73a3bd
+guid: 152fbdf1a7d454542966abff882de1ce
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4377255261061652557
-    second: winPP_0
+      213: -4520841343835760246
+    second: PHOTO-2025-04-11-03-59-20_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -152,13 +152,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: winPP_0
+      name: PHOTO-2025-04-11-03-59-20_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1280
-        height: 843
+        width: 1200
+        height: 735
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -167,8 +167,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3bfd531288dd043c0800000000000000
-      internalID: -4377255261061652557
+      spriteID: a8915ce00ceb241c0800000000000000
+      internalID: -4520841343835760246
       vertices: []
       indices: 
       edges: []
@@ -187,7 +187,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      winPP_0: -4377255261061652557
+      PHOTO-2025-04-11-03-59-20_0: -4520841343835760246
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

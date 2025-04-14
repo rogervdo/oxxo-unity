@@ -1532,8 +1532,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inputNickname: {fileID: 808061360}
   inputPassword: {fileID: 422594467}
-  txtMensajeError: {fileID: 0}
---- !u!4 &1438283857
+
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

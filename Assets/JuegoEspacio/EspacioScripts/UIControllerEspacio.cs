@@ -30,14 +30,24 @@ public class UIControllerEspacio : MonoBehaviour
 
      IEnumerator MatchTime()
     {
-        yield return new WaitForSeconds(1); // Espera 1 segundo
+        yield return new WaitForSecondsRealtime(1); // Espera 1 segundo
         time -= 1; // Reduce el tiempo
         ActiveText(); // Actualiza el texto en la UI
 
         if (time == 0)
         {
-            SceneManager.LoadScene("Escena_Ganar_S"); // Carga la escena de fin del juego cuando se acaba el tiempo
+            int scoreFinal = ScoreManager.Instance.score;
+
+            PlayerPrefs.SetInt("lastScoreEspacial", scoreFinal);
+            PlayerPrefs.Save();
+
+            if (ScoreSender.Instance != null)
+                ScoreSender.Instance.EnviarScoreFinal(scoreFinal);
+
+            SceneManager.LoadScene("Escena_Ganar_S");
         }
+
+
         else
         {
             StartCoroutine(MatchTime()); // Vuelve a llamar la corutina si aún hay tiempo
@@ -74,7 +84,7 @@ private IEnumerator EnviarDecisionAPI(int idOpcion)
         yield break;
     }
 
-    string url = "https://10.22.169.234:7058/videojuego/respuesta";
+    string url = "https://localhost:7058/videojuego/respuesta";
 
     WWWForm form = new WWWForm();
     form.AddField("id_instancia", idInstancia);

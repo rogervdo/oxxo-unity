@@ -7,7 +7,7 @@ public class APIManager : MonoBehaviour
 {
     public static APIManager Instance;
 
-    public string apiBaseUrl = "https://10.22.169.234:7058"; // <- reemplaza con tu URL real
+    public string apiBaseUrl = "https://localhost:7058"; // <- reemplaza con tu URL real
 
     public int idInstancia { get; private set; }
     public List<Caso> casosCargados = new List<Caso>();

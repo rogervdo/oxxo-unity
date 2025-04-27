@@ -20,7 +20,7 @@ public class CasoViewer : MonoBehaviour
 
     private IEnumerator CargarCasoDesdeAPI(int idCaso)
     {
-        string url = $"https://10.22.169.234:7058/Videojuego/caso/{idCaso}";
+        string url = $"https://localhost:7058/Videojuego/caso/{idCaso}";
         UnityWebRequest request = UnityWebRequest.Get(url);
         request.certificateHandler = new ForceAcceptAll();
         yield return request.SendWebRequest();

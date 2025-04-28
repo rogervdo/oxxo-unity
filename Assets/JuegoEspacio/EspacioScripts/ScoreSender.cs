@@ -6,19 +6,28 @@ public class ScoreSender : MonoBehaviour
 {
     public static ScoreSender Instance;
 
-    private string apiUrl = "https://localhost:7058/Score/SaveGameResult"; 
+    [Header("Configuración API")]
+    public string apiUrl = "https://10.22.200.182:7058/Score/SaveGameResult"; // 🔥 Pon aquí tu URL real
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(this.gameObject);
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    [System.Serializable]
+    public class SaveScoreRequest
+    {
+        public int idUsuario;
+        public int idJuego;
+        public int puntuacion;
     }
 
     public void EnviarScoreFinal(int puntuacion)
@@ -30,7 +39,7 @@ public class ScoreSender : MonoBehaviour
         }
 
         int idUsuario = UserManager.Instance.CurrentUserId.Value;
-        int idJuego = 1; // ID fijo como mencionaste
+        int idJuego = 2; // 🔥 ID del juego de nave, pon el ID correcto aquí
 
         StartCoroutine(EnviarCoroutine(idUsuario, idJuego, puntuacion));
     }
@@ -51,25 +60,19 @@ public class ScoreSender : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        request.certificateHandler = new APIManagerLogin.ForceAcceptAll(); // para certificados locales
+        request.certificateHandler = new APIManagerLogin.ForceAcceptAll(); // 🔥 O pon null si no usas certificado especial
+
+        Debug.Log($"🚀 Enviando JSON de Score: {json}");
 
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log("✅ Puntaje enviado exitosamente.");
+            Debug.Log("✅ Score enviado exitosamente.");
         }
         else
         {
-            Debug.LogError("❌ Error al enviar puntaje: " + request.error);
+            Debug.LogError("❌ Error al enviar score: " + request.error);
         }
-    }
-
-    [System.Serializable]
-    public class SaveScoreRequest
-    {
-        public int idUsuario;
-        public int idJuego;
-        public int puntuacion;
     }
 }

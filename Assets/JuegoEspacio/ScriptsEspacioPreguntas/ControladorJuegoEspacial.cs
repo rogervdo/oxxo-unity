@@ -11,9 +11,11 @@ public class ControladorJuegoEspacial : MonoBehaviour
     [SerializeField] private Ui_LivesControll vidasUI;
 
     [System.Serializable]
-    public class InstanciaRespuesta
+    public class PuntajeRequestBody
     {
-        public int id_instancia;
+        public int idUsuario;
+        public int idJuego;
+        public int puntuacion;
     }
 
     private float tiempoActual;
@@ -25,11 +27,13 @@ public class ControladorJuegoEspacial : MonoBehaviour
     public event System.Action OnTiempoFinalizado2;
     public event System.Action OnTiempoFinalizado3;
 
-    public int signoActivo = 1; // Valor que defines según el signo activo
+    public int signoActivo = 1;
+
+    private bool resultadoEnviado = false;
 
     private void Start()
     {
-        APIManagerEspacial.Instance.IniciarJuegoEspacial(); // ✅ Solo carga las preguntas espaciales
+        APIManagerEspacial.Instance.IniciarJuegoEspacial();
     }
 
     private void Update()
@@ -77,10 +81,10 @@ public class ControladorJuegoEspacial : MonoBehaviour
         GameSessionManager.Instance.QuitarVida();
         vidasUI.UpdateLives();
 
-        // Si ya no tiene vidas, termina el juego
-        if (GameSessionManager.Instance.ObtenerVidas() <= 0)
+        if (GameSessionManager.Instance.ObtenerVidas() <= 0 && !resultadoEnviado)
         {
-            GuardarResultadoFinalYTerminar2();
+            resultadoEnviado = true;
+            StartCoroutine(GuardarResultadoFinal());
             return;
         }
 
@@ -98,62 +102,56 @@ public class ControladorJuegoEspacial : MonoBehaviour
         }
     }
 
-    // Si quieres terminar SIN guardar puntaje
-    public void GuardarResultadoFinalYTerminar()
-    {
-        SceneManager.LoadScene("FinalPreguntas");
-    }
-
-    // ✅ Esta es la versión correcta: guarda puntaje e instancia
     public void GuardarResultadoFinalYTerminar2()
     {
-        int puntajeFinal = GameSessionManager.Instance.ObtenerPuntaje();
-        int idUsuario = UserManager.Instance.GetCurrentUser2();
+        if (resultadoEnviado) return;
+        resultadoEnviado = true;
 
-        StartCoroutine(CrearInstanciaYGuardarResultado(puntajeFinal, idUsuario));
+        StartCoroutine(GuardarResultadoFinal());
     }
 
-    // ✅ Crear instancia de juego espacial Y guardar puntaje al mismo tiempo
-    private IEnumerator CrearInstanciaYGuardarResultado(int puntajeFinal, int idUsuario)
+    private IEnumerator GuardarResultadoFinal()
     {
-        // 1. Crear la instancia
-        string urlCrearInstancia = "https://localhost:7058/Videojuego/instancia/1"; // ID 1 = Juego espacial
-        UnityWebRequest requestInstancia = UnityWebRequest.PostWwwForm(urlCrearInstancia, "");
-        requestInstancia.certificateHandler = new ForceAcceptAll();
-        yield return requestInstancia.SendWebRequest();
+        int puntajeFinal = GameSessionManager.Instance.ObtenerPuntaje();
+        int idUsuario = UserManager.Instance != null ? UserManager.Instance.GetCurrentUser2() : 0;
 
-        if (requestInstancia.result != UnityWebRequest.Result.Success)
+        Debug.Log($"✅ Guardando solo el puntaje. Puntaje: {puntajeFinal}, Usuario: {idUsuario}");
+
+        // Mandar solo el puntaje directamente
+        string urlGuardarPuntaje = APIManagerEspacial.Instance.apiBaseUrl + "/Score/SaveGameResult";
+
+        PuntajeRequestBody data = new PuntajeRequestBody
         {
-            Debug.LogError("❌ Error al crear instancia de juego: " + requestInstancia.error);
-            yield break;
-        }
+            idUsuario = idUsuario,
+            idJuego = 1,
+            puntuacion = puntajeFinal
+        };
 
-        // 2. Extraer el id_instancia creado
-        InstanciaRespuesta respuesta = JsonUtility.FromJson<InstanciaRespuesta>(requestInstancia.downloadHandler.text);
-        int idInstancia = respuesta.id_instancia;
+        string jsonData = JsonUtility.ToJson(data);
+        Debug.Log($"🚀 Enviando JSON de Puntaje: {jsonData}");
 
-        Debug.Log($"✅ Instancia creada correctamente. ID: {idInstancia}");
+        UnityWebRequest request = new UnityWebRequest(urlGuardarPuntaje, "POST");
+        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(jsonToSend);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.certificateHandler = new ForceAcceptAll();
 
-        // 3. Guardar el puntaje
-        string urlGuardarPuntaje = "https://localhost:7058/Score/SaveGameResult";
+        yield return request.SendWebRequest();
 
-        WWWForm form = new WWWForm();
-        form.AddField("puntaje", puntajeFinal);
-        form.AddField("idInstancia", idInstancia);
-        form.AddField("id_usuario", idUsuario);
-
-        UnityWebRequest requestPuntaje = UnityWebRequest.Post(urlGuardarPuntaje, form);
-        requestPuntaje.certificateHandler = new ForceAcceptAll();
-        yield return requestPuntaje.SendWebRequest();
-
-        if (requestPuntaje.result == UnityWebRequest.Result.Success)
+        if (request.result == UnityWebRequest.Result.Success)
         {
             Debug.Log("✅ Puntaje guardado correctamente.");
-            SceneManager.LoadScene("Escena_Ganar_Q"); // 🎯 Cargar la escena de final de juego
         }
         else
         {
-            Debug.LogError("❌ Error al guardar puntaje: " + requestPuntaje.error);
+            Debug.LogError($"❌ Error al guardar puntaje: {request.error}");
         }
+
+        yield return new WaitForSeconds(0.5f); // Dar tiempo visual
+
+        // Ahora cambiar de escena
+        Debug.Log("✅ Cambiando a FinalPreguntas...");
+        SceneManager.LoadScene("FinalPreguntas");
     }
 }

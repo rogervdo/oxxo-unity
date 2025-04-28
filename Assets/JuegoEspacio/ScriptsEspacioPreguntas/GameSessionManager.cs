@@ -92,5 +92,23 @@ public void AumentarRespuestasCorrectas()
     respuestasCorrectas++;
 }
 
+// ✅ Al final de tu clase GameSessionManager:
+
+// 🔴 Reiniciar contador de respuestas correctas
+public void ReiniciarRespuestasCorrectas()
+{
+    respuestasCorrectas = 0;
+}
+
+// 🟢 Reiniciar TODO el estado de partida
+public void ReiniciarSesionCompleta()
+{
+    ReiniciarVidas();
+    ReiniciarPuntaje();
+    ReiniciarPreguntas();
+    ReiniciarPuntosPreguntas();
+    ReiniciarRespuestasCorrectas();
+}
+
 
 }

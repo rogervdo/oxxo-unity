@@ -20,18 +20,24 @@ public class GameInitializer : MonoBehaviour
             uiPanel.SetActive(false);
     }
 
-    public void IniciarJuego()
+   public void IniciarJuego()
+{
+    if (GameSessionManager.Instance != null)
     {
-        // Reanuda el juego
-        Time.timeScale = 1f;
-
-        // Oculta instrucciones y muestra el juego
-        if (canvasInstrucciones != null)
-            canvasInstrucciones.SetActive(false);
-        
-        if (uiPanel != null)
-            uiPanel.SetActive(true);
+        GameSessionManager.Instance.ReiniciarSesionCompleta(); // ✅ Reiniciar todo
     }
+
+    // Reanuda el juego
+    Time.timeScale = 1f;
+
+    // Oculta instrucciones y muestra el juego
+    if (canvasInstrucciones != null)
+        canvasInstrucciones.SetActive(false);
+    
+    if (uiPanel != null)
+        uiPanel.SetActive(true);
+}
+
 
     public void IniciarJuegoNAVE()
     {

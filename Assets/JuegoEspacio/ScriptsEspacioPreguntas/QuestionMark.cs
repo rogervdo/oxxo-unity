@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections; // 🔥 Necesario para IEnumerator
 
 public class QuestionMark : MonoBehaviour
 {
@@ -56,7 +57,7 @@ public class QuestionMark : MonoBehaviour
                 ControladorJuegoEspacial.ActivarTemporizador();
             }
 
-            CargarPreguntaYOpciones(numeroSigno - 1); // índice del caso
+            CargarPreguntaYOpciones(numeroSigno - 1);
         }
     }
 
@@ -94,19 +95,23 @@ public class QuestionMark : MonoBehaviour
                 botonesOpciones[index].onClick.RemoveAllListeners();
                 botonesOpciones[index].onClick.AddListener(() =>
                 {
-                    // 🟢 Aumenta preguntas respondidas SIEMPRE
+                    var controlador = FindFirstObjectByType<ControladorJuegoEspacial>();
+
                     GameSessionManager.Instance?.AumentarPreguntasRespondidas();
 
                     if (!esCorrecta)
                     {
-                        var controlador = FindFirstObjectByType<ControladorJuegoEspacial>();
                         if (controlador != null)
                         {
                             controlador.SpendLives();
 
                             if (GameSessionManager.Instance.ObtenerVidas() <= 0)
                             {
-                                SceneManager.LoadScene("FinalPreguntas");
+                                if (controlador != null)
+                                {
+                                    controlador.GuardarResultadoFinalYTerminar2();
+                                }
+                                StartCoroutine(CambiarEscenaFinalDespuesDeGuardar());
                                 return;
                             }
                         }
@@ -117,15 +122,17 @@ public class QuestionMark : MonoBehaviour
                         int puntos = pregunta.puntaje;
                         GameSessionManager.Instance?.AgregarPuntos(puntos);
                         GameSessionManager.Instance?.AgregarPuntosPreguntas(puntos);
-                        GameSessionManager.Instance?.AumentarRespuestasCorrectas(); // ✅ IMPORTANTE
+                        GameSessionManager.Instance?.AumentarRespuestasCorrectas();
                     }
 
-
-                    // ✅ Si ya respondió 6 en total → final
                     if (GameSessionManager.Instance != null &&
                         GameSessionManager.Instance.preguntasRespondidas >= 6)
                     {
-                        SceneManager.LoadScene("FinalPreguntas");
+                        if (controlador != null)
+                        {
+                            controlador.GuardarResultadoFinalYTerminar2();
+                        }
+                        StartCoroutine(CambiarEscenaFinalDespuesDeGuardar());
                         return;
                     }
 
@@ -139,12 +146,27 @@ public class QuestionMark : MonoBehaviour
                 });
             }
 
-            // Oculta botones sobrantes si hay menos de 3 opciones
             for (int i = cantidadOpciones; i < botonesOpciones.Length; i++)
             {
                 botonesOpciones[i].gameObject.SetActive(false);
             }
         }));
+    }
+
+    private IEnumerator CambiarEscenaFinalDespuesDeGuardar()
+    {
+        yield return new WaitForSeconds(1.0f); // 🔥 Tiempo de seguridad para guardar
+        Debug.Log("✅ Cambiando a escena FinalPreguntas...");
+        SceneManager.LoadScene("FinalPreguntas");
+    }
+
+    private void DesactivarBotones()
+    {
+        foreach (var boton in botonesOpciones)
+        {
+            if (boton != null)
+                boton.interactable = false;
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -177,5 +199,4 @@ public class QuestionMark : MonoBehaviour
                 boton.gameObject.SetActive(true);
         }
     }
-    
 }

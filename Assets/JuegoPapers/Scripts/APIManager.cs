@@ -1,23 +1,20 @@
-using UnityEngine;
-using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Networking;
 
 public class APIManager : MonoBehaviour
 {
-    public static APIManager Instance;
-
-    public string apiBaseUrl = "https://localhost:7058"; // <- reemplaza con tu URL real
-
-    public int idInstancia { get; private set; }
-    public List<Caso> casosCargados = new List<Caso>();
+    public static APIManager Instance; // Singleton para fácil acceso
+    public string apiBaseUrl = "https://localhost:7058"; // URL base de tu API
+    private List<Caso> casosCargados = new List<Caso>(); // Lista local de casos
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // opcional si quieres conservar entre escenas
+            DontDestroyOnLoad(gameObject); // Opcional: mantener entre escenas si quieres
         }
         else
         {
@@ -25,47 +22,42 @@ public class APIManager : MonoBehaviour
         }
     }
 
-    public void IniciarJuego(int idJuego = 2)
+    // Método para obtener casos desde la API
+    public void ObtenerCasos()
     {
-        StartCoroutine(CrearInstanciaYObtenerCasos(idJuego));
+        StartCoroutine(ObtenerCasosDesdeAPI());
     }
 
-    private IEnumerator CrearInstanciaYObtenerCasos(int idJuego)
+    private IEnumerator ObtenerCasosDesdeAPI()
     {
-        // 1. Crear instancia
-        string urlInstancia = $"{apiBaseUrl}/videojuego/instancia/{idJuego}";
+        string urlCasos = $"{apiBaseUrl}/videojuego";
+        UnityWebRequest casosRequest = UnityWebRequest.Get(urlCasos);
+        casosRequest.certificateHandler = new ForceAcceptAll(); // Solo si tienes problemas con HTTPS local
+        yield return casosRequest.SendWebRequest();
 
-        UnityWebRequest request = UnityWebRequest.PostWwwForm(urlInstancia, "");
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
+        if (casosRequest.result == UnityWebRequest.Result.Success)
         {
-            InstanciaRespuesta respuesta = JsonUtility.FromJson<InstanciaRespuesta>(request.downloadHandler.text);
-            idInstancia = respuesta.id_instancia;
-
-            Debug.Log("Instancia creada: " + idInstancia);
-
-            // 2. Obtener casos aleatorios
-            string urlCasos = $"{apiBaseUrl}/videojuego";
-            UnityWebRequest casosRequest = UnityWebRequest.Get(urlCasos);
-            yield return casosRequest.SendWebRequest();
-
-            if (casosRequest.result == UnityWebRequest.Result.Success)
+            try
             {
                 string json = casosRequest.downloadHandler.text;
                 Caso[] casos = JsonHelper.FromJson<Caso>(json);
                 casosCargados = new List<Caso>(casos);
-
-                Debug.Log("Casos recibidos: " + casosCargados.Count);
+                Debug.Log("APIManager: Casos recibidos correctamente. Total: " + casosCargados.Count);
             }
-            else
+            catch (System.Exception ex)
             {
-                Debug.LogError("Error al obtener casos: " + casosRequest.error);
+                Debug.LogError("APIManager: Error parseando casos: " + ex.Message);
             }
         }
         else
         {
-            Debug.LogError("Error al crear instancia: " + request.error);
+            Debug.LogError("APIManager: Error al obtener casos: " + casosRequest.error);
         }
+    }
+
+    // Método para acceder a los casos cargados
+    public List<Caso> GetCasos()
+    {
+        return casosCargados;
     }
 }

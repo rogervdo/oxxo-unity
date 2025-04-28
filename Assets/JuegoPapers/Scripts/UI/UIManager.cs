@@ -8,6 +8,8 @@ using UnityEngine.Networking;  // Necesario para el contexto de APIScoreSender
 
 public class UIManager : MonoBehaviour
 {
+    public static UIManager Instance; // Singletone Esto lo agregas arriba en tu clase
+
     [Header("Paneles")] // Encabezado para organizar en el Inspector
     public GameObject clipboardPanel; // Referencia al panel del portapapeles
     public GameObject libroPanel;     // Referencia al panel del libro
@@ -44,6 +46,7 @@ public class UIManager : MonoBehaviour
     public CasoViewer casoViewer;           // Referencia al script que muestra la información del caso
     public OpcionesManager opcionesManager; // Referencia al script que maneja las opciones
     public IndicadoresManager indicadoresManager; // Referencia al script que maneja los indicadores (¡Asegúrate que esté asignado!)
+    private bool juegoYaInicializado = false;
 
     // --- Start y otros métodos permanecen en gran parte iguales ---
     private void Start()
@@ -60,7 +63,24 @@ public class UIManager : MonoBehaviour
          }
 
         // Inicia la corutina que prepara el juego obteniendo datos de la API
-        StartCoroutine(InicializarJuegoDesdeAPI());
+        if (!juegoYaInicializado)
+        {
+            juegoYaInicializado = true;
+            StartCoroutine(InicializarJuegoDesdeAPI());
+        }
+    }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // Opcional: hace que UIManager no se destruya entre escenas
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     // Muestra el panel del portapapeles
@@ -227,88 +247,60 @@ public class UIManager : MonoBehaviour
     // Corutina para inicializar el juego obteniendo datos de la API
     private IEnumerator InicializarJuegoDesdeAPI()
     {
-        // --- 1. Crear Instancia ---
-        // Usa la variable apiBaseUrl definida a nivel de clase
-        UnityWebRequest request = UnityWebRequest.PostWwwForm($"{apiBaseUrl}/Videojuego/instancia/2", "");
-        request.certificateHandler = new ForceAcceptAll(); // Necesario si usas HTTPS con certificado local/inválido
-        yield return request.SendWebRequest(); // Envía la solicitud y espera respuesta
+        Debug.Log("UIManager: Inicializando juego desde API.");
 
-        // Comprueba si hubo error en la solicitud
-        if (request.result != UnityWebRequest.Result.Success)
-        {
-            Debug.LogError("UIManager: Error creando instancia de juego: " + request.error);
-            // Manejar el error: quizás mostrar un mensaje, deshabilitar el juego, volver al menú principal
-            yield break; // Termina la corutina si falla
-        }
-
-        // Parsea la respuesta para obtener el ID de la instancia
-        InstanciaRespuesta data = JsonUtility.FromJson<InstanciaRespuesta>(request.downloadHandler.text);
-        idInstancia = data.id_instancia;
-        Debug.Log($"UIManager: Instancia de juego creada con ID: {idInstancia}");
-
-
-        // --- 2. Inicializar Valores de Indicadores ---
-        UnityWebRequest initValores = UnityWebRequest.PostWwwForm($"{apiBaseUrl}/Videojuego/inicializar_valores/{idInstancia}", "");
+        // --- 1. Inicializar valores de indicadores ---
+        UnityWebRequest initValores = UnityWebRequest.PostWwwForm($"{apiBaseUrl}/Videojuego/inicializar_valores/{scoreGameId}", "");
         initValores.certificateHandler = new ForceAcceptAll();
         yield return initValores.SendWebRequest();
 
         if (initValores.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("UIManager: Error inicializando valores de indicadores: " + initValores.error);
+            Debug.LogError("UIManager: ❌ Error inicializando valores de indicadores: " + initValores.error);
             yield break;
         }
-        Debug.Log($"UIManager: Valores de indicadores inicializados para instancia {idInstancia}");
+        Debug.Log("UIManager: ✅ Valores de indicadores inicializados.");
 
-
-        // --- 3. Mostrar Indicadores Iniciales ---
-        indicadoresManager.idInstancia = idInstancia; // Pasa el ID de instancia al manager de indicadores
-        indicadoresManager.MostrarIndicadores(); // Pide al manager que muestre los indicadores en la UI
-
-
-        // --- 4. Obtener Todos los Casos ---
+        // --- 2. Obtener todos los casos ---
         UnityWebRequest requestCasos = UnityWebRequest.Get($"{apiBaseUrl}/Videojuego");
         requestCasos.certificateHandler = new ForceAcceptAll();
         yield return requestCasos.SendWebRequest();
 
         if (requestCasos.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError("UIManager: Error obteniendo casos de juego: " + requestCasos.error);
+            Debug.LogError("UIManager: ❌ Error obteniendo casos: " + requestCasos.error);
             yield break;
         }
 
-        // Intenta parsear la lista de casos desde el JSON recibido
-        try {
+        try
+        {
             listaCasos = JsonHelper.FromJson<Caso>(requestCasos.downloadHandler.text).ToList();
-            if (listaCasos == null || listaCasos.Count == 0) {
-                 Debug.LogError("UIManager: Falló el parseo de casos o no se recibieron casos de la API.");
-                 yield break;
+            if (listaCasos == null || listaCasos.Count == 0)
+            {
+                Debug.LogError("UIManager: ❌ No se recibieron casos de la API.");
+                yield break;
             }
-             // Crea una lista con los IDs de los casos y la desordena aleatoriamente
             ordenCasosAleatorios = listaCasos.Select(c => c.id_caso).OrderBy(x => Random.value).ToList();
-            Debug.Log($"UIManager: Recibidos {listaCasos.Count} casos. Orden aleatorio generado.");
-
-        } catch (System.Exception ex) {
-             Debug.LogError($"UIManager: Error parseando JSON de casos: {ex.Message}. JSON: {requestCasos.downloadHandler.text}");
-             yield break;
+            Debug.Log($"UIManager: ✅ Casos recibidos: {listaCasos.Count}");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"UIManager: ❌ Error parseando casos: {ex.Message}");
+            yield break;
         }
 
-
-        // --- 5. Ordenar Sprites Aleatoriamente ---
-        // Asegúrate que el array spritesLideres esté asignado y tenga elementos en el Inspector
-         if (spritesLideres == null || spritesLideres.Length == 0) {
-             Debug.LogError("UIManager: ¡El array 'Sprites Lideres' no está asignado o está vacío en el Inspector!");
-             // Decide cómo manejar esto - ¿usar uno por defecto? ¿detener?
-             yield break;
-         }
-         // Crea una lista de índices (0, 1, 2, ...) hasta el número de sprites disponibles y la desordena
+        // --- 3. Ordenar sprites de líderes ---
+        if (spritesLideres == null || spritesLideres.Length == 0)
+        {
+            Debug.LogError("UIManager: ❌ Sprites de líderes no asignados.");
+            yield break;
+        }
         ordenSpritesAleatorios = Enumerable.Range(0, spritesLideres.Length).OrderBy(x => Random.value).ToList();
 
-
-        // --- Iniciar Juego ---
-        indiceCaso = -1; // Empieza antes del primer caso (-1 para que el primer incremento sea 0)
-        CargarSiguienteCaso(); // Carga el primer caso
+        // --- 4. Preparar primer caso ---
+        indiceCaso = -1; // Antes del primer caso
+        CargarSiguienteCaso();
     }
-
 
     // Métodos de ayuda si se necesitan en otros scripts
     public int GetOrdenDelCasoActual()
@@ -325,77 +317,70 @@ public class UIManager : MonoBehaviour
 
 
     // --- NUEVA CORUTINA PARA MANEJAR ENVÍO DE PUNTUACIÓN Y CARGA DE ESCENA ---
-    private IEnumerator FinalizeGameAndSendScore(int finalScore)
+    public IEnumerator FinalizeGameAndSendScore(int finalScore)
     {
-        Debug.Log($"UIManager: Finalizando juego. Puntuación: {finalScore}. Intentando enviar puntuación vía API...");
+        Debug.Log($"UIManager: Finalizando juego. Puntuación final: {finalScore}");
 
-        // --- Opcional: Guardar puntuación para mostrar en la escena final ---
-        // Si tus escenas Win/Lose/Alt necesitan mostrar la puntuación, guárdala aquí.
-        PlayerPrefs.SetInt("PuntajeFinal", finalScore);
-        PlayerPrefs.Save(); // Asegura que se guarde inmediatamente si la necesita la siguiente escena
+        int? userId = UserManager.Instance?.CurrentUserId;
 
-        // --- Intentar enviar puntuación a la API ---
-        int? userId = UserManager.Instance?.CurrentUserId; // Obtiene el ID del usuario logueado (si existe)
-
-        // Comprueba si hay un usuario logueado
-        if (userId.HasValue)
+        if (!userId.HasValue)
         {
-            // Construye la URL completa de la API para enviar puntuaciones
-            string fullApiUrl = "";
-            if (!string.IsNullOrEmpty(apiBaseUrl) && !string.IsNullOrEmpty(scoreApiEndpointPath))
-            {
-                fullApiUrl = apiBaseUrl.TrimEnd('/') + "/" + scoreApiEndpointPath.TrimStart('/'); // Construye URL segura
-                Debug.Log($"UIManager: Enviando puntuación a {fullApiUrl}");
-
-                // Inicia la corutina de envío de APIScoreSender Y ESPERA a que termine
-                // APIScoreSender debe ser accesible (estático o una instancia)
-                // Asegúrate que APIScoreSender.SendScore es una Corutina (IEnumerator)
-                yield return StartCoroutine(APIScoreSender.SendScore(fullApiUrl, userId.Value, this.scoreGameId, finalScore));
-                // La ejecución se reanuda aquí *después* de que APIScoreSender.SendScore termine su solicitud web
-
-                Debug.Log("UIManager: Intento de APIScoreSender finalizado.");
-            }
-            else
-            {
-                Debug.LogError("UIManager: No se puede construir la URL de la API de puntuación - ¡apiBaseUrl o scoreApiEndpointPath faltan o están vacíos! Puntuación no enviada.");
-                // Espera un breve momento incluso si la API falla, para evitar un cambio de escena abrupto
-                yield return new WaitForSeconds(0.2f);
-            }
-        }
-        else
-        {
-            Debug.LogWarning("UIManager: No hay usuario logueado (UserManager). Puntuación no enviada.");
-            // Espera un breve momento incluso si no se envía, para evitar un cambio de escena abrupto
-            yield return new WaitForSeconds(0.2f);
+            Debug.LogWarning("UIManager: No hay usuario logueado. No se puede guardar puntaje.");
+            yield break;
         }
 
-        // --- Cargar la escena final apropiada BASADA EN LA PUNTUACIÓN ---
-        string targetScene = ""; // Variable para almacenar el nombre de la escena a cargar
-        // Comprueba la puntuación contra los umbrales definidos
+        // 1. Crear objeto de datos con los nombres correctos
+        SaveGameResultRequest data = new SaveGameResultRequest(userId.Value, 2, finalScore);
+        string jsonData = JsonUtility.ToJson(data);
+
+        // 2. Crear el request
+        string url = $"{apiBaseUrl}/Score/SaveGameResult";
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.certificateHandler = new ForceAcceptAll();
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"UIManager: ❌ Error al guardar puntaje: {request.error}");
+            yield break;
+        }
+
+        Debug.Log("UIManager: ✅ Puntaje guardado correctamente.");
+
+        // 3. Cargar escena final
+        string targetScene = "";
+
         if (finalScore >= winScoreThreshold)
         {
-            targetScene = winSceneName; // Escena de victoria
+            targetScene = winSceneName;
         }
         else if (finalScore <= loseScoreThreshold)
         {
-            targetScene = loseSceneName; // Escena de derrota
+            targetScene = loseSceneName;
         }
         else
         {
-            targetScene = alternateEndSceneName; // Escena alternativa
+            targetScene = alternateEndSceneName;
         }
 
-        // Valida y carga la escena objetivo
         if (!string.IsNullOrEmpty(targetScene))
         {
-            Debug.Log($"UIManager: Cargando escena final '{targetScene}' basada en puntuación {finalScore}.");
-            SceneManager.LoadScene(targetScene); // Carga la escena determinada
+            Debug.Log($"UIManager: Cargando escena final '{targetScene}'.");
+            SceneManager.LoadScene(targetScene);
         }
         else
         {
-            Debug.LogError($"UIManager: ¡No se pudo determinar la escena objetivo o el nombre de la escena está vacío! Revisa los umbrales y las variables de nombre de escena. Puntuación fue {finalScore}.");
-            // Quizás cargar una escena de error por defecto o el menú principal aquí
+            Debug.LogError("UIManager: ❌ No se pudo determinar la escena final.");
         }
     }
+
+
+
     // --- FIN NUEVA CORUTINA ---
 }

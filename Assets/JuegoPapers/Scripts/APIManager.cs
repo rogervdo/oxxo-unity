@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 public class APIManager : MonoBehaviour
 {
     public static APIManager Instance; // Singleton para fácil acceso
-    public string apiBaseUrl = "https://localhost:7058"; // URL base de tu API
+    public string apiBaseUrl = "https://10.22.169.234:7058"; // URL base de tu API
     private List<Caso> casosCargados = new List<Caso>(); // Lista local de casos
 
     private void Awake()

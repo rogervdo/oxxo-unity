@@ -5,7 +5,7 @@ using System.Collections;
 public class APIManagerLogin : MonoBehaviour
 {
     public static APIManagerLogin Instance; // Instancia Singleton.
-    public string apiBaseUrl = "https://localhost:7058"; // URL base para la API.
+    public string apiBaseUrl = "https://10.22.169.234:7058"; // URL base para la API.
 
 
     [System.Serializable]

@@ -28,7 +28,7 @@ public class OpcionesManager : MonoBehaviour
 
     private IEnumerator ObtenerOpciones(int idCaso)
     {
-        string url = $"https://localhost:7058/Videojuego/opciones/{idCaso}";
+        string url = $"https://10.22.169.234:7058/Videojuego/opciones/{idCaso}";
         UnityWebRequest request = UnityWebRequest.Get(url);
         request.certificateHandler = new ForceAcceptAll();
         yield return request.SendWebRequest();
@@ -67,7 +67,7 @@ public class OpcionesManager : MonoBehaviour
 
     private IEnumerator CargarImpactosDeAPI(int idOpcion, int botonIndex)
     {
-        string url = $"https://localhost:7058/Videojuego/opcion/{idOpcion}/indicadores";
+        string url = $"https://10.22.169.234:7058/Videojuego/opcion/{idOpcion}/indicadores";
         UnityWebRequest request = UnityWebRequest.Get(url);
         request.certificateHandler = new ForceAcceptAll();
         yield return request.SendWebRequest();
@@ -91,7 +91,7 @@ public class OpcionesManager : MonoBehaviour
 
     private IEnumerator AplicarImpactoEnBD(int idOpcion)
     {
-        string url = "https://localhost:7058/Videojuego/aplicar_impacto";
+        string url = "https://10.22.169.234:7058/Videojuego/aplicar_impacto";
 
         var datos = new AplicarImpactoRequest
         {

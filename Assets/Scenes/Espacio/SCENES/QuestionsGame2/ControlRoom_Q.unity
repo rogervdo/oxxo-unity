@@ -759,7 +759,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31e1ee4b3c8d84689b99809fe2af9a8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiBaseUrl: https://localhost:7058
+  apiBaseUrl: https://10.22.169.234:7058
   preguntasEspaciales: []
 --- !u!4 &142359120
 Transform:
@@ -2475,6 +2475,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvasInstrucciones: {fileID: 183782755}
   uiPanel: {fileID: 206540291}
+  uiControllerEspacio: {fileID: 0}
 --- !u!4 &676296433
 Transform:
   m_ObjectHideFlags: 0

@@ -87,7 +87,7 @@ public class UIControllerEspacio : MonoBehaviour
             yield break;
         }
 
-        string url = "https://localhost:7058/videojuego/respuesta";
+        string url = "https://10.22.169.234:7058/videojuego/respuesta";
 
         WWWForm form = new WWWForm();
         form.AddField("id_instancia", idInstancia);
@@ -119,7 +119,7 @@ public class UIControllerEspacio : MonoBehaviour
             yield break;
         }
 
-        string apiUrl = "https://localhost:7058/Score/SaveGameResult";
+        string apiUrl = "https://10.22.169.234:7058/Score/SaveGameResult";
 
         SaveScoreRequest requestBody = new SaveScoreRequest
         {

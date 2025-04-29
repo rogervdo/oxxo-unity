@@ -8,7 +8,7 @@ public class LogrosManager : MonoBehaviour
     public static LogrosManager Instance;
 
     [Header("Configuración")]
-    public string apiBaseUrl = "https://localhost:7058/Logros";  // <-- pon tu URL real
+    public string apiBaseUrl = "https://10.22.169.234:7058/Logros";  // <-- pon tu URL real
     public int idUsuario;  // Id del usuario logueado
 
     [Header("Logros")]
@@ -54,6 +54,7 @@ public class LogrosManager : MonoBehaviour
     {
         string url = $"{apiBaseUrl}/{idUsuario}";
         UnityWebRequest request = UnityWebRequest.Get(url);
+        request.certificateHandler = new ForceAcceptAll();
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -92,6 +93,7 @@ public class LogrosManager : MonoBehaviour
         string jsonData = JsonUtility.ToJson(requestBody);
 
         UnityWebRequest request = new UnityWebRequest(url, "POST");
+        request.certificateHandler = new ForceAcceptAll();
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();

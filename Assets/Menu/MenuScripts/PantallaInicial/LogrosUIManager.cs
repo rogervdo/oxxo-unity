@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class LogrosUIManager : MonoBehaviour
 {
     [Header("Configuración API")]
-    public string apiBaseUrl = "https://localhost:7058/Logros";  // tu endpoint base
+    public string apiBaseUrl = "https://10.22.169.234:7058/Logros";  // tu endpoint base
     public int idUsuario;
 
     [Header("UI Elementos")]
@@ -60,6 +60,7 @@ public class LogrosUIManager : MonoBehaviour
     {
         string url = $"{apiBaseUrl}/{idUsuario}";
         UnityWebRequest request = UnityWebRequest.Get(url);
+        request.certificateHandler = new ForceAcceptAll();
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)

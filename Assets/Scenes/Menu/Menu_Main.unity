@@ -470,7 +470,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94c19e96139b7c04ead4be60d02c77b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiBaseUrl: https://localhost:7058/Logros
+  apiBaseUrl: https://10.22.169.234:7058/Logros
   idUsuario: 0
   logrosAssets:
   - id_logro: 1

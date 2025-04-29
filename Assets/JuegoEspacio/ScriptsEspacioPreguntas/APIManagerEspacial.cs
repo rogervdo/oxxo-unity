@@ -7,7 +7,7 @@ public class APIManagerEspacial : MonoBehaviour
 {
     public static APIManagerEspacial Instance;
 
-    public string apiBaseUrl = "https://10.22.197.131:7058";
+    public string apiBaseUrl = "https://10.22.169.234:7058";
     public List<PreguntaEspacio> preguntasEspaciales = new List<PreguntaEspacio>();
 
     private bool preguntasCargadas = false; // ✅ Nuevo flag

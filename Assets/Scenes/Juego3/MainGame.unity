@@ -2743,8 +2743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e03e147ceae9c8b4b966f137eb162f1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiBaseUrl: https://localhost:7058
-  casosCargados: []
+  apiBaseUrl: https://10.22.169.234:7058
 --- !u!4 &769172483
 Transform:
   m_ObjectHideFlags: 0
@@ -4420,7 +4419,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   clipboardPanel: {fileID: 889267430}
   libroPanel: {fileID: 81593717}
-  apiBaseUrl: https://localhost:7058
+  apiBaseUrl: https://10.22.169.234:7058
   scoreApiEndpointPath: /Score/SaveGameResult
   scoreGameId: 1
   winSceneName: WinScenePP

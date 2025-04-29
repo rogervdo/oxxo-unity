@@ -39,17 +39,17 @@ public class ScoreSender : MonoBehaviour
         }
 
         int idUsuario = UserManager.Instance.CurrentUserId.Value;
-        int idJuego = 2; // 🔥 ID del juego de nave, pon el ID correcto aquí
+        int idJuegos = 5; // 🔥 ID del juego de nave, pon el ID correcto aquí
 
-        StartCoroutine(EnviarCoroutine(idUsuario, idJuego, puntuacion));
+        StartCoroutine(EnviarCoroutine(idUsuario, idJuegos, puntuacion));
     }
 
-    private IEnumerator EnviarCoroutine(int idUsuario, int idJuego, int puntuacion)
+    private IEnumerator EnviarCoroutine(int idUsuario, int idJuegos, int puntuacion)
     {
         SaveScoreRequest requestBody = new SaveScoreRequest
         {
             idUsuario = idUsuario,
-            idJuego = idJuego,
+            idJuego = idJuegos,
             puntuacion = puntuacion
         };
 

@@ -111,7 +111,7 @@ public class UIControllerEspacio : MonoBehaviour
     private IEnumerator EnviarScoreFinal(int puntuacion)
     {
         int idUsuario = UserManager.Instance != null ? UserManager.Instance.GetCurrentUser2() : 0;
-        int idJuego = 1; // 🔥 Siempre juego ID 1 como me dijiste
+        int idJuego = 5; // 🔥 Siempre juego ID 1 como me dijiste
 
         if (idUsuario == 0)
         {

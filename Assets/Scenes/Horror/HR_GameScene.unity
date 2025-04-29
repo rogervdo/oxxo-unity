@@ -1652,7 +1652,7 @@ MonoBehaviour:
   loweredMusicVolumeMultiplier: 0.1
   pointsPerSecond: 1
   currentGameId: 3
-  saveScoreApiUrl: https://localhost:7058/Score/SaveGameResult
+  saveScoreApiUrl: https://10.22.169.234:7058/Score/SaveGameResult
 --- !u!114 &466513957
 MonoBehaviour:
   m_ObjectHideFlags: 0

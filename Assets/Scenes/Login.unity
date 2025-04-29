@@ -1329,7 +1329,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23f4a5b862f054c91b5bc1f808f11dd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiBaseUrl: https://localhost:7058
+  apiBaseUrl: https://10.22.169.234:7058
 --- !u!4 &1278328631
 Transform:
   m_ObjectHideFlags: 0

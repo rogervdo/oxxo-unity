@@ -39,7 +39,7 @@ public class HealthController : MonoBehaviour
     public int currentGameId = 3;           // ID de este juego en base datos
 
     // --- Configuración API ---
-    public string saveScoreApiUrl = "https://localhost:7058/Score/SaveGameResult"; // URL endpoint API para guardar puntaje.
+    public string saveScoreApiUrl = "https://10.22.169.234:7058/Score/SaveGameResult"; // URL endpoint API para guardar puntaje.
 
     // --- Variables Internas ---
     private float currentHealth;                  // Vida actual.

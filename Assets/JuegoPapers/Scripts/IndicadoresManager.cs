@@ -21,7 +21,7 @@ public class IndicadoresManager : MonoBehaviour
 
     IEnumerator CargarIndicadores()
     {
-        string url = $"https://localhost:7058/Videojuego/valores_actuales/{idInstancia}";
+        string url = $"https://10.22.169.234:7058/Videojuego/valores_actuales/{idInstancia}";
         UnityWebRequest req = UnityWebRequest.Get(url);
         req.certificateHandler = new ForceAcceptAll(); // Certificado local
         yield return req.SendWebRequest();

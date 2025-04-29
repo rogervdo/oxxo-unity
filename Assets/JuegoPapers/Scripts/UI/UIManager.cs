@@ -16,7 +16,7 @@ public class UIManager : MonoBehaviour
     private int idInstancia;          // ID de la instancia de juego actual
 
     [Header("API Configuration")] // Configuración de la API
-    public string apiBaseUrl = "https://localhost:7058"; // URL base para llamadas API
+    public string apiBaseUrl = "https://10.22.169.234:7058"; // URL base para llamadas API
     public string scoreApiEndpointPath = "/api/Puntuaciones"; // <<< ESTABLECE TU RUTA REAL PARA PUNTUACIONES AQUÍ
     public int scoreGameId = 2; // <<< ESTABLECE EL ID CORRECTO PARA ESTE JUEGO AQUÍ
 

@@ -7,7 +7,7 @@ public class ScoreSender : MonoBehaviour
     public static ScoreSender Instance;
 
     [Header("Configuración API")]
-    public string apiUrl = "https://10.22.200.182:7058/Score/SaveGameResult"; // 🔥 Pon aquí tu URL real
+    public string apiUrl = "https://10.22.169.234:7058/Score/SaveGameResult"; // 🔥 Pon aquí tu URL real
 
     private void Awake()
     {

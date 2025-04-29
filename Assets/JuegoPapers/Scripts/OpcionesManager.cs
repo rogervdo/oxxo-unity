@@ -110,6 +110,10 @@ public class OpcionesManager : MonoBehaviour
         request.certificateHandler = new ForceAcceptAll();
 
         yield return request.SendWebRequest();
+        Debug.Log("🔵 Estado de la request: " + request.result);
+        Debug.Log("🔵 Código de respuesta HTTP: " + request.responseCode);
+        Debug.Log("🔵 Error (si existe): " + request.error);
+
 
         if (request.result != UnityWebRequest.Result.Success)
         {
@@ -118,8 +122,9 @@ public class OpcionesManager : MonoBehaviour
         else
         {
             Debug.Log("✅ Impacto aplicado correctamente.");
-            indicadoresManager.MostrarIndicadores(); // Refresca la hoja de indicadores
+            Debug.Log("📜 Respuesta de API: " + request.downloadHandler.text);
         }
+
         indicadoresManager.MostrarIndicadores();
         uiManager.tabletOpcionesContainer.SetActive(false);
     }

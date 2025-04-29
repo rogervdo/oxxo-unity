@@ -47,10 +47,13 @@ public class UIManager : MonoBehaviour
     public OpcionesManager opcionesManager; // Referencia al script que maneja las opciones
     public IndicadoresManager indicadoresManager; // Referencia al script que maneja los indicadores (¡Asegúrate que esté asignado!)
     private bool juegoYaInicializado = false;
+    private int idUsuario; // 🆕 Agregado
+
 
     // --- Start y otros métodos permanecen en gran parte iguales ---
     private void Start()
     {
+        idUsuario = UserManager.Instance.GetCurrentUser2();
         // Asegura que los componentes requeridos estén asignados en el Inspector
         if (indicadoresManager == null || opcionesManager == null || casoViewer == null || liderMovimiento == null)
         {
@@ -249,8 +252,26 @@ public class UIManager : MonoBehaviour
     {
         Debug.Log("UIManager: Inicializando juego desde API.");
 
-        // --- 1. Inicializar valores de indicadores ---
-        UnityWebRequest initValores = UnityWebRequest.PostWwwForm($"{apiBaseUrl}/Videojuego/inicializar_valores/{scoreGameId}", "");
+        // 1. Crear la nueva instancia de partida
+        UnityWebRequest requestInstancia = UnityWebRequest.PostWwwForm($"{apiBaseUrl}/Videojuego/instancia/2", "");
+        requestInstancia.certificateHandler = new ForceAcceptAll();
+        yield return requestInstancia.SendWebRequest();
+
+        if (requestInstancia.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("UIManager: ❌ Error creando instancia: " + requestInstancia.error);
+            yield break;
+        }
+
+        // Parsear el ID de la nueva instancia
+        InstanciaRespuesta data = JsonUtility.FromJson<InstanciaRespuesta>(requestInstancia.downloadHandler.text);
+        idInstancia = data.id_instancia; // Guardamos el nuevo ID
+        indicadoresManager.idInstancia = idInstancia; 
+
+        Debug.Log($"UIManager: ✅ Instancia creada con ID {idInstancia}");
+
+        // 2. Inicializar valores de indicadores usando la instancia
+        UnityWebRequest initValores = UnityWebRequest.PostWwwForm($"{apiBaseUrl}/Videojuego/inicializar_valores/{idInstancia}", "");
         initValores.certificateHandler = new ForceAcceptAll();
         yield return initValores.SendWebRequest();
 
@@ -259,9 +280,9 @@ public class UIManager : MonoBehaviour
             Debug.LogError("UIManager: ❌ Error inicializando valores de indicadores: " + initValores.error);
             yield break;
         }
-        Debug.Log("UIManager: ✅ Valores de indicadores inicializados.");
+        Debug.Log("UIManager: ✅ Valores de indicadores inicializados para instancia " + idInstancia);
 
-        // --- 2. Obtener todos los casos ---
+        // 3. Obtener todos los casos
         UnityWebRequest requestCasos = UnityWebRequest.Get($"{apiBaseUrl}/Videojuego");
         requestCasos.certificateHandler = new ForceAcceptAll();
         yield return requestCasos.SendWebRequest();
@@ -275,11 +296,6 @@ public class UIManager : MonoBehaviour
         try
         {
             listaCasos = JsonHelper.FromJson<Caso>(requestCasos.downloadHandler.text).ToList();
-            if (listaCasos == null || listaCasos.Count == 0)
-            {
-                Debug.LogError("UIManager: ❌ No se recibieron casos de la API.");
-                yield break;
-            }
             ordenCasosAleatorios = listaCasos.Select(c => c.id_caso).OrderBy(x => Random.value).ToList();
             Debug.Log($"UIManager: ✅ Casos recibidos: {listaCasos.Count}");
         }
@@ -289,7 +305,7 @@ public class UIManager : MonoBehaviour
             yield break;
         }
 
-        // --- 3. Ordenar sprites de líderes ---
+        // 4. Ordenar sprites de líderes
         if (spritesLideres == null || spritesLideres.Length == 0)
         {
             Debug.LogError("UIManager: ❌ Sprites de líderes no asignados.");
@@ -297,10 +313,12 @@ public class UIManager : MonoBehaviour
         }
         ordenSpritesAleatorios = Enumerable.Range(0, spritesLideres.Length).OrderBy(x => Random.value).ToList();
 
-        // --- 4. Preparar primer caso ---
-        indiceCaso = -1; // Antes del primer caso
+        // 5. Preparar primer caso
+        indiceCaso = -1; 
         CargarSiguienteCaso();
     }
+
+
 
     // Métodos de ayuda si se necesitan en otros scripts
     public int GetOrdenDelCasoActual()
@@ -321,39 +339,43 @@ public class UIManager : MonoBehaviour
     {
         Debug.Log($"UIManager: Finalizando juego. Puntuación final: {finalScore}");
 
-        int? userId = UserManager.Instance?.CurrentUserId;
-
-        if (!userId.HasValue)
+        if (idInstancia <= 0)
         {
-            Debug.LogWarning("UIManager: No hay usuario logueado. No se puede guardar puntaje.");
+            Debug.LogError("UIManager: ❌ ID de instancia inválido. No se puede actualizar puntaje.");
             yield break;
         }
 
-        // 1. Crear objeto de datos con los nombres correctos
-        SaveGameResultRequest data = new SaveGameResultRequest(userId.Value, 2, finalScore);
+        // Crear objeto JSON para actualizar el puntaje
+        UpdateGameResultRequest data = new UpdateGameResultRequest(idInstancia, finalScore, idUsuario);
+
         string jsonData = JsonUtility.ToJson(data);
 
-        // 2. Crear el request
-        string url = $"{apiBaseUrl}/Score/SaveGameResult";
+        Debug.Log($"📦 Datos que se enviarán a la API: idInstancia = {idInstancia}, puntuacion = {finalScore}, idUsuario = {idUsuario}");
+        Debug.Log($"📜 JSON final: {jsonData}");
 
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        // Enviar la actualización
+        string urlUpdate = $"{apiBaseUrl}/Videojuego/UpdateGameResult";
+
+        UnityWebRequest requestUpdate = new UnityWebRequest(urlUpdate, "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-        request.certificateHandler = new ForceAcceptAll();
+        requestUpdate.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        requestUpdate.downloadHandler = new DownloadHandlerBuffer();
+        requestUpdate.SetRequestHeader("Content-Type", "application/json");
+        requestUpdate.certificateHandler = new ForceAcceptAll();
 
-        yield return request.SendWebRequest();
+        yield return requestUpdate.SendWebRequest();
 
-        if (request.result != UnityWebRequest.Result.Success)
+        if (requestUpdate.result == UnityWebRequest.Result.Success)
         {
-            Debug.LogError($"UIManager: ❌ Error al guardar puntaje: {request.error}");
-            yield break;
+            Debug.Log("UIManager: ✅ Puntaje actualizado correctamente.");
+
+            // Guardar puntaje final para mostrarlo en la escena de resultados
+            PlayerPrefs.SetInt("PuntajeFinal", finalScore);
+            PlayerPrefs.Save();
         }
 
-        Debug.Log("UIManager: ✅ Puntaje guardado correctamente.");
-
-        // 3. Cargar escena final
+        // Ahora mostrar la escena final como siempre
         string targetScene = "";
 
         if (finalScore >= winScoreThreshold)
@@ -381,6 +403,70 @@ public class UIManager : MonoBehaviour
     }
 
 
+    private IEnumerator ConsultarYMostrarMaximoPuntaje(int idUsuario, int idJuego, int nuevoPuntaje)
+    {
+        string url = $"{apiBaseUrl}/Score/MaximoPuntaje/{idUsuario}/{idJuego}";
 
-    // --- FIN NUEVA CORUTINA ---
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        request.certificateHandler = new ForceAcceptAll();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError($"UIManager: ❌ Error al consultar máximo puntaje: {request.error}");
+            yield break;
+        }
+
+        try
+        {
+            MaximoPuntajeResponse response = JsonUtility.FromJson<MaximoPuntajeResponse>(request.downloadHandler.text);
+            PlayerPrefs.SetInt("PuntajeMaximoHistorial", response.puntuacionMaxima);
+
+            Debug.Log($"UIManager: 🏆 Puntaje máximo histórico: {response.puntuacionMaxima}");
+
+            if (nuevoPuntaje > response.puntuacionMaxima)
+            {
+                Debug.Log("🎉 ¡Nuevo Mejor Puntaje!");
+                PlayerPrefs.SetInt("NuevoRecord", 1); // Opcional, para usarlo en la escena final
+            }
+            else
+            {
+                Debug.Log($"👑 Mejor puntaje sigue siendo: {response.puntuacionMaxima} pts.");
+                PlayerPrefs.SetInt("NuevoRecord", 0);
+            }
+
+            // 3. Después de mostrar el mensaje, cargar la escena final
+            string targetScene = "";
+
+            if (nuevoPuntaje >= winScoreThreshold)
+            {
+                targetScene = winSceneName;
+            }
+            else if (nuevoPuntaje <= loseScoreThreshold)
+            {
+                targetScene = loseSceneName;
+            }
+            else
+            {
+                targetScene = alternateEndSceneName;
+            }
+
+            if (!string.IsNullOrEmpty(targetScene))
+            {
+                Debug.Log($"UIManager: Cargando escena final '{targetScene}'.");
+                SceneManager.LoadScene(targetScene);
+            }
+            else
+            {
+                Debug.LogError("UIManager: ❌ No se pudo determinar la escena final.");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"UIManager: ❌ Error procesando respuesta de máximo puntaje: {ex.Message}");
+        }
+    }
+
 }
